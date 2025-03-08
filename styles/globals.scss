@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"] {
+    -webkit-appearance: none;
+    margin: 0;
+    -moz-appearance: textfield !important;
+  }
+}
+
+@layer components {
+  body {
+    @apply bg-black;
+    @apply text-white;
+  }
+
+  input:focus {
+    @apply ring-0 #{!important};
+  }
+
+  .auth-button {
+    @apply bg-white;
+    @apply py-2;
+    @apply px-4;
+    @apply font-medium;
+    @apply rounded-lg;
+    @apply text-base;
+    @apply text-gray-900;
+    &:hover {
+      @apply opacity-90;
+    }
+    &:disabled {
+      @apply opacity-75;
+      @apply cursor-not-allowed;
+    }
+  }
+
+  .nav-connect-button > button {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  .primary-action-button {
+    @apply py-3 px-5;
+    @apply text-black;
+    @apply bg-gradient-to-bl from-primary to-[#B3F7F2];
+    @apply rounded-lg;
+    @apply font-medium text-sm;
+    &:hover {
+      @apply opacity-90;
+    }
+  }
+
+  .stream-action-button {
+    @apply flex items-center;
+    @apply font-medium text-sm;
+    @apply border rounded-lg;
+    @apply py-2 px-4;
+    @apply cursor-pointer;
+    &:hover {
+      @apply bg-neutral-600 bg-opacity-5;
+    }
+    &:disabled {
+      @apply cursor-not-allowed;
+      @apply text-neutral-400 border-neutral-400;
+    }
+
+    @screen sm {
+      @apply py-2 px-12;
+    }
+  }
+
+  .streams-table {
+    @apply border-separate border-spacing-y-1;
+    @apply w-full;
+    thead {
+      @apply bg-neutral-900;
+      tr {
+        th {
+          @apply py-3;
+          @apply font-normal;
+          @apply text-xs;
+          @apply text-neutral-500;
+          @apply whitespace-nowrap;
+          &:first-child {
+            @apply pl-6;
+            @apply rounded-l-lg;
+          }
+          &:last-child {
+            @apply rounded-r-lg;
+          }
+        }
+      }
+    }
+
+    tbody {
+      @apply bg-neutral-950;
+      tr {
+        td {
+          @apply py-5;
+          @apply font-light;
+          @apply text-sm;
+          @apply whitespace-nowrap;
+          @apply px-4;
+          &:first-child {
+            @apply pl-6;
+            @apply rounded-l-lg;
+          }
+          &:last-child {
+            @apply rounded-r-lg;
+          }
+          .secondary-text {
+            @apply text-xs;
+            @apply text-neutral-400;
+          }
+          @screen sm {
+            @apply whitespace-normal;
+            @apply px-0;
+          }
+        }
+        &:hover {
+          @apply opacity-60;
+          @apply cursor-pointer;
+        }
+      }
+    }
+  }
+}
