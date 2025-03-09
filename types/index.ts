@@ -33,7 +33,7 @@ export enum StreamStatus {
 }
 
 export interface IStreamResource {
-  dbld: string;
+  dbld?: string;
   stream_id: string;
   sender: string;
   amount: string;

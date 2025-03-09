@@ -8,13 +8,14 @@ import { denominate } from "../../utils/economics";
 import { classNames, extractTokenName, getShortAddress, getStreamStatus } from "../../utils/presentation";
 import { streamDetailsPath } from "../../utils/routes";
 import ProgressBarSmall from "./ProgressBarSmall";
-import { useSuiClientQuery } from "@mysten/dapp-kit";
+import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 
 const formatDate = (date: string): string => {
   return moment(parseInt(date)).format("MMM Do 'YY @ H a");
 };
 
 export default function StreamTableItem({ stream }: { stream: IStreamResource }) {
+  const account = useCurrentAccount();
   const router = useRouter();
 
   const { data: coinMetadata } = useSuiClientQuery(
@@ -22,6 +23,9 @@ export default function StreamTableItem({ stream }: { stream: IStreamResource })
     {
       coinType: stream.token
     },
+    {
+      enabled: !!account,
+    }
   );
 
   const status = useMemo(() => {

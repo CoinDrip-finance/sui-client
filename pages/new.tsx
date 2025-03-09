@@ -101,6 +101,8 @@ const Home: NextPage = () => {
         });
       }
 
+      console.log(formData)
+
       const tx = new Transaction();
       tx.setSender(account.address);
       tx.setGasBudget(50_000_000);
@@ -113,6 +115,8 @@ const Home: NextPage = () => {
       }
       const segmentsVector = segments.toVector(tx);
 
+      const cliff = (formData.cliff || 0) * 1000;
+
       tx.moveCall({
         target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::create_stream`,
         typeArguments: [selectedToken?.coinType!],
@@ -120,7 +124,7 @@ const Home: NextPage = () => {
           coin,
           tx.pure.address(formData.recipient),
           tx.pure.u64(new Date().getTime() + 1000 * 60),
-          tx.pure.u64(formData.cliff || 0),
+          tx.pure.u64(cliff),
           segmentsVector,
           tx.object("0x6")
         ]
