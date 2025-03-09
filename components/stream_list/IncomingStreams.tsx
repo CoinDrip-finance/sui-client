@@ -1,17 +1,14 @@
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
-import axios from "axios";
-import { useMemo, useState } from "react";
-import { IStreamResource } from "../../types";
+import { useEffect, useMemo, useState } from "react";
 import { classNames } from "../../utils/presentation";
 import StreamsTable from "./StreamsTable";
-import useSWRInfinite from 'swr/infinite';
-import stream from "../../pages/api/stream";
-import { start } from "repl";
+import { SuiObjectResponse } from "@mysten/sui/dist/cjs/client";
 
 export default function IncomingStreams() {
     const account = useCurrentAccount();
     const address = account?.address;
     const [cursor, setCursor] = useState<string | null | undefined>(null);
+    const [streamList, setStreamList] = useState<SuiObjectResponse[]>([]);
 
     const { data, isLoading } = useSuiClientQuery(
         'getOwnedObjects',
@@ -30,12 +27,17 @@ export default function IncomingStreams() {
         }
     );
 
+    useEffect(() => {
+        if (data)
+            setStreamList((prev) => [...prev, ...data?.data]);
+    }, [data]);
+
     const nextCursor = useMemo(() => {
         return data?.nextCursor;
     }, [data]);
 
     const streams = useMemo<any[]>(() => {
-        return data?.data?.map(e => {
+        return streamList?.map(e => {
             return {
                 stream_id: e.data?.objectId,
                 // @ts-ignore
@@ -57,7 +59,7 @@ export default function IncomingStreams() {
                 remaining_balance: e.data?.content?.fields?.balance,
             }
         }) || [];
-    }, [data]);
+    }, [streamList]);
 
     const isLoadingMore = isLoading;
     const isEmpty = data?.data.length === 0;
