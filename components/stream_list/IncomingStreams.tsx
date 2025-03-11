@@ -10,7 +10,7 @@ export default function IncomingStreams() {
     const [cursor, setCursor] = useState<string | null | undefined>(null);
     const [streamList, setStreamList] = useState<SuiObjectResponse[]>([]);
 
-    const { data, isLoading } = useSuiClientQuery(
+    const { data, isLoading, refetch } = useSuiClientQuery(
         'getOwnedObjects',
         {
             cursor,
@@ -28,8 +28,18 @@ export default function IncomingStreams() {
     );
 
     useEffect(() => {
+        if (!address) return;
+
+        setStreamList([]);
+        refetch();
+    }, [address]);
+
+    useEffect(() => {
         if (data)
-            setStreamList((prev) => [...prev, ...data?.data]);
+            setStreamList((prev) => {
+                const streamsToPush = data.data.filter((e: any) => !prev.find((s) => s.data?.objectId === e.data?.objectId));
+                return [...prev, ...streamsToPush];
+            });
     }, [data]);
 
     const nextCursor = useMemo(() => {
@@ -45,16 +55,16 @@ export default function IncomingStreams() {
                 // @ts-ignore
                 amount: e.data?.content?.fields?.initial_deposit,
                 // @ts-ignore
-                start_time: e.data?.content?.fields?.start_time,
+                start_time: parseInt(e.data?.content?.fields?.start_time),
                 // @ts-ignore
-                end_time: e.data?.content?.fields?.end_time,
+                end_time: parseInt(e.data?.content?.fields?.end_time),
                 // @ts-ignore
                 token: e.data?.content?.fields?.token,
                 // @ts-ignore
-                cliff: e.data?.content?.fields?.cliff,
+                cliff: parseInt(e.data?.content?.fields?.cliff),
                 segments: [],
                 // @ts-ignore
-                createdAt: e.data?.fields?.start_time,
+                createdAt: parseInt(e.data?.content?.fields?.start_time),
                 // @ts-ignore
                 remaining_balance: e.data?.content?.fields?.balance,
             }

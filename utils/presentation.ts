@@ -56,9 +56,7 @@ export const getStreamStatusDetails = (stream: IStreamResponse): StreamStatus =>
   return StreamStatus.Settled;
 };
 
-export const getStreamStatus = (stream: IStreamResource | IStreamResponse): StreamStatus => {
-  //@ts-ignore
-  if (stream?.stream) return getStreamStatusDetails(stream as IStreamResponse);
+export const getStreamStatus = (stream: IStreamResource): StreamStatus => {
   return getStreamStatusListing(stream as IStreamResource);
 };
 
