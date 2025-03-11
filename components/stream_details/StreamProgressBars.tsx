@@ -1,17 +1,18 @@
 import { useMemo } from 'react';
 
-import { IStreamResponse } from '../../types';
+import { IStreamResource, IStreamResponse } from '../../types';
 import { getAmountStreamed, getClaimedAmount } from '../../utils/presentation';
 import ProgressBarSmall from '../stream_list/ProgressBarSmall';
+import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
 
-export default function StreamProgressBars({ data }: { data: IStreamResponse }) {
+export default function StreamProgressBars({ data, tokenMetadata }: { data: IStreamResource; tokenMetadata: CoinMetadata }) {
   const amountStreamed = useMemo(() => {
     return getAmountStreamed(data).percent;
   }, [data]);
 
   const claimed = useMemo(() => {
-    return getClaimedAmount(data).percent;
-  }, [data]);
+    return getClaimedAmount(data, tokenMetadata).percent;
+  }, [data, tokenMetadata]);
 
   return (
     <div className="flex items-center sm:space-x-16 mt-8 flex-col sm:flex-row space-y-4 sm:space-y-0">

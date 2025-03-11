@@ -26,6 +26,8 @@ export default class GetStreamAction extends BaseAction {
     return new ApiResponse({
       body: {
         ...streamFromDb,
+        start_time: parseInt(streamFromDb.start_time),
+        end_time: parseInt(streamFromDb.end_time),
         claims,
       },
     }).cache(60, 6);

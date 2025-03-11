@@ -12,7 +12,9 @@ import BigNumber from 'bignumber.js';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
-import { IChartSegment, ISegment, IStreamResponse } from '../../types';
+import { IChartSegment, ISegment, IStreamResource, IStreamResponse } from '../../types';
+import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
+import { extractTokenName } from '../../utils/presentation';
 
 interface AppleStock {
   date: string;
@@ -46,7 +48,7 @@ export type AreaProps = {
   margin?: { top: number; right: number; bottom: number; left: number };
 };
 
-const mapSegments = (startDate: string, decimals: number, segments: ISegment[]): IChartSegment[] => {
+const mapSegments = (startDate: number, decimals: number, segments: ISegment[]): IChartSegment[] => {
   let segmentStartDate = moment(startDate);
   let segmentAmount = new BigNumber(0);
   let chartSegments: IChartSegment[] = [];
@@ -76,7 +78,7 @@ const generatePointsFromSegments = (cliff: number, segments: IChartSegment[]): A
 
   segments.forEach((segment) => {
     for (let i = 0; i <= 100; i++) {
-      const pointDuration = (i * segment.duration) / 100;
+      const pointDuration = (i * parseInt(segment.duration)) / 100;
       const pointAmount = Math.pow(i / 100, segment.exponent) * segment.denominatedAmount;
       const pointDate = segment.startDate.clone().add(pointDuration, "s");
       if (pointDate > cliffEnd) {
@@ -96,7 +98,7 @@ const generatePointsFromSegments = (cliff: number, segments: IChartSegment[]): A
   return points;
 };
 
-export default withTooltip<AreaProps & { stream: IStreamResponse }, TooltipData>(
+export default withTooltip<AreaProps & { stream: IStreamResource; tokenMetadata: CoinMetadata }, TooltipData>(
   ({
     width,
     height,
@@ -107,17 +109,24 @@ export default withTooltip<AreaProps & { stream: IStreamResponse }, TooltipData>
     tooltipTop = 0,
     tooltipLeft = 0,
     stream,
-  }: AreaProps & WithTooltipProvidedProps<TooltipData> & { stream: IStreamResponse }) => {
+    tokenMetadata
+  }: AreaProps & WithTooltipProvidedProps<TooltipData> & { stream: IStreamResource; tokenMetadata: CoinMetadata }) => {
     if (width < 10) return null;
 
     const stock = useMemo(() => {
       const chartSegments = mapSegments(
-        stream.stream.start_time,
-        stream.stream.payment.token_decimals,
-        stream.stream.segments
+        stream.start_time,
+        tokenMetadata?.decimals || 9,
+        // @ts-ignore
+        stream.segments.map(s => {
+          return {
+            ...s,
+            duration: parseInt(s.duration) / 1000,
+          }
+        })
       );
-      return generatePointsFromSegments(stream.stream.cliff, chartSegments);
-    }, [stream]);
+      return generatePointsFromSegments(parseInt(stream.cliff) / 1000, chartSegments);
+    }, [stream, tokenMetadata]);
 
     // bounds
     const innerWidth = width - margin.left - margin.right;
@@ -247,7 +256,7 @@ export default withTooltip<AreaProps & { stream: IStreamResponse }, TooltipData>
         {tooltipData && (
           <div>
             <TooltipWithBounds key={Math.random()} top={tooltipTop - 60} left={tooltipLeft} style={tooltipStyles}>
-              {`${getStockValue(tooltipData).toFixed(2)} ${stream.stream.payment.token_name}`}
+              {`${getStockValue(tooltipData).toFixed(2)} ${extractTokenName(stream.token)}`}
             </TooltipWithBounds>
             <Tooltip
               top={innerHeight + margin.top - 4}

@@ -37,8 +37,8 @@ export interface IStreamResource {
   stream_id: string;
   sender: string;
   amount: string;
-  start_time: string;
-  end_time: string;
+  start_time: number;
+  end_time: number;
   token: string;
   cliff: string;
   segments: ISegment[];
@@ -125,7 +125,7 @@ export interface IStreamResponse {
 export interface ISegment {
   amount: string;
   exponent: number;
-  duration: number;
+  duration: string;
 }
 
 export interface IChartSegment extends ISegment {

@@ -2,52 +2,48 @@ import { BoltIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, WalletIcon, XCircl
 import moment from 'moment';
 import { useMemo } from 'react';
 
-import { IStreamResponse } from '../../types';
+import { IStreamResource, IStreamResponse } from '../../types';
 import { denominate } from '../../utils/economics';
-import { getStreamStatus } from '../../utils/presentation';
+import { extractTokenName, getStreamStatus } from '../../utils/presentation';
 import StreamPropItem from './StreamPropItem';
+import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
 
-const formatDate = (date: string): string => {
+const formatDate = (date: number): string => {
   return moment(date).format("MMM D 'YY, H a");
 };
 
-export default function StreamProps({ data }: { data: IStreamResponse }) {
+export default function StreamProps({ data, tokenMetadata }: { data: IStreamResource; tokenMetadata?: CoinMetadata }) {
   const status = useMemo(() => {
     return getStreamStatus(data);
   }, [data]);
 
   const deposit = useMemo(() => {
-    return `${denominate(data.stream.payment.amount, 5, data.stream.payment.token_decimals)} ${
-      data.stream.payment.token_identifier
-    }`;
-  }, [data]);
-
-  const cancelable = useMemo(() => {
-    if (data.stream.can_cancel) return "Yes";
-    return "No";
-  }, [data]);
+    if (!tokenMetadata) return "0";
+    return `${denominate(data.amount, 5, tokenMetadata?.decimals)} ${extractTokenName(data.token)
+      }`;
+  }, [data, tokenMetadata]);
 
   const createdOn = useMemo(() => {
-    return formatDate(data.stream.start_time);
+    return formatDate(data.start_time);
   }, [data]);
 
   const willEndOn = useMemo(() => {
-    return formatDate(data.stream.end_time);
+    return formatDate(data.end_time);
   }, [data]);
 
   const cliff = useMemo(() => {
-    if (data.stream.cliff === 0) {
+    if (parseInt(data.cliff) === 0) {
       return "No cliff";
     }
 
-    return moment(data.stream.start_time).add(data.stream.cliff, "seconds").toString();
+    return moment(data.start_time).add(parseInt(data.cliff), "milliseconds").toString();
   }, [data]);
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-lg mt-8 p-5 grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
       <StreamPropItem label="Status" value={status} Icon={BoltIcon} />
       <StreamPropItem label="Deposit" value={deposit} Icon={WalletIcon} />
-      <StreamPropItem label="Cancelable" value={cancelable} Icon={XCircleIcon} />
+      {/* <StreamPropItem label="Cancelable" value={cancelable} Icon={XCircleIcon} /> */}
 
       <StreamPropItem label="Created on" value={createdOn} Icon={CalendarIcon} />
       <StreamPropItem label="Will end" value={willEndOn} Icon={CalendarDaysIcon} />

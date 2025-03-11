@@ -13,6 +13,12 @@ import { homePath } from '../../../utils/routes';
 import type { NextPage } from "next";
 import { useSuiClientQuery } from '@mysten/dapp-kit';
 import useSWR from 'swr';
+import StreamProps from '../../../components/stream_details/StreamProps';
+import StreamProgressBars from '../../../components/stream_details/StreamProgressBars';
+import { ParentSize } from '@visx/responsive';
+import StreamChart from '../../../components/stream_details/StreamChart';
+import Nft from '../../../components/stream_details/Nft';
+import StreamActions from '../../../components/stream_details/StreamActions';
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
@@ -99,17 +105,18 @@ const StreamDetails: NextPage = () => {
       <BackButtonWrapper href={homePath} size="max-w-screen-md">
         <Overview data={data} tokenMetadata={coinMetadata!} tokenIcon={paymentTokenImage} />
 
+        {/* @ts-ignore */}
         <SenderRecipientDetails senderAddress={data.sender} recipientAddress={recipientAddress?.AddressOwner} />
 
-        {/* <StreamProps data={data} />
+        <StreamProps data={data} tokenMetadata={coinMetadata!} />
 
-        <StreamProgressBars data={data} />
+        <StreamProgressBars data={data} tokenMetadata={coinMetadata!} />
 
-        <StreamActions data={data} refresh={mutate} />
+        {/* <StreamActions data={data} refresh={mutate} /> */}
 
-        <ParentSize>{({ width, height }) => <StreamChart width={width} height={300} stream={data} />}</ParentSize>
+        <ParentSize>{({ width, height }) => <StreamChart width={width} height={300} stream={data} tokenMetadata={coinMetadata!} />}</ParentSize>
 
-        <Nft data={data} /> */}
+        <Nft data={data} />
       </BackButtonWrapper>
     </Layout>
   );

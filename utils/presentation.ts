@@ -32,7 +32,7 @@ export async function getHerotag(address: string): Promise<string | undefined> {
 }
 
 export const getStreamStatusListing = (stream: IStreamResource): StreamStatus => {
-  const startTime = moment(stream.start_time);
+  const startTime = moment();
   if (moment() < startTime) return StreamStatus.Pending;
 
   const endTime = moment(stream.end_time);
@@ -90,17 +90,18 @@ export const getClaimedAmount = (data: IStreamResource, tokenMetadata: CoinMetad
   const percent = ((claimedAmount * 100) / deposit).toFixed(0);
 
   return {
-    value: denominate(balance, 5, tokenMetadata.decimals).toNumber(),
+    value: denominate(balance, 5, tokenMetadata?.decimals || 9).toNumber(),
     percent,
   };
 };
 
 export const getAmountStreamed = (data: IStreamResource): { value: number; percent: string } => {
   const currentTime = new Date().getTime();
-  const startTime = parseInt(data.start_time);
-  const endTime = parseInt(data.end_time);
+  const startTime = data.start_time;
+  const endTime = data.end_time;
   const percent = ((currentTime - startTime) / (endTime - startTime));
   const value = parseInt(data.amount) * percent;
+
   return {
     value: Math.min(value, parseInt(data.amount)),
     percent: (percent * 100).toFixed(0),
