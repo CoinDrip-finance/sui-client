@@ -4,11 +4,16 @@ import { NextApiHandler } from "next";
 
 import { IStreamResponse } from "../../../../types";
 import { denominate } from "../../../../utils/economics";
-import { formatNumber } from "../../../../utils/presentation";
+import { extractTokenName, formatNumber, getShortAddress } from "../../../../utils/presentation";
+import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 
 export const config = {
   runtime: "edge",
 };
+
+// @ts-ignore
+const rpcUrl = getFullnodeUrl(process.env.NEXT_PUBLIC_NETWORK);
+const client = new SuiClient({ url: rpcUrl });
 
 const handler: NextApiHandler = async (req) => {
   try {
@@ -41,10 +46,21 @@ const handler: NextApiHandler = async (req) => {
       );
     }
 
-    const baseUrl = process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : "http://localhost:3000";
-    const streamData: IStreamResponse = await fetch(`${baseUrl}/api/stream/${id}`).then((res) => res.json());
+    const streamObject = await client.getObject({
+      id: id!,
+      options: {
+        showContent: true
+      }
+    });
 
-    const duration = moment(streamData.stream.end_time).diff(moment(streamData.stream.start_time), "days");
+    // @ts-ignore
+    const streamData = streamObject?.data?.content?.fields;
+
+    const tokenMetadata = await client.getCoinMetadata({
+      coinType: streamData.token
+    });
+
+    const durationInDays = moment(parseInt(streamData.end_time)).diff(moment(parseInt(streamData.start_time)), "days");
 
     return new ImageResponse(
       (
@@ -75,7 +91,7 @@ const handler: NextApiHandler = async (req) => {
             }}
           >
             <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-              <div style={{ display: "flex", fontSize: 32 }}>Token Stream #{id}</div>
+              <div style={{ display: "flex", fontSize: 32 }}>Token Stream {getShortAddress(id, 10)}</div>
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: "32px", gap: "18px" }}>
                 <div
                   style={{
@@ -90,7 +106,7 @@ const handler: NextApiHandler = async (req) => {
                   }}
                 >
                   <div style={{ display: "flex", fontSize: "26px", fontWeight: "bold" }}>
-                    {streamData.stream.payment.token_identifier}
+                    {extractTokenName(streamData.token)}
                   </div>
                   <div style={{ display: "flex", fontSize: "16px", fontWeight: "bold" }}>Token</div>
                 </div>
@@ -109,13 +125,13 @@ const handler: NextApiHandler = async (req) => {
                   <div style={{ display: "flex", fontSize: "26px", fontWeight: "bold" }}>
                     {formatNumber(
                       denominate(
-                        streamData.stream.payment.amount,
+                        streamData.initial_deposit,
                         2,
-                        streamData.stream.payment.token_decimals
+                        tokenMetadata?.decimals
                       ).toNumber()
                     )}
                   </div>
-                  <div style={{ display: "flex", fontSize: "16px", fontWeight: "bold" }}>Deposit</div>
+                  <div style={{ display: "flex", fontSize: "16px", fontWeight: "bold" }}>Initial Deposit</div>
                 </div>
                 <div
                   style={{
@@ -129,8 +145,14 @@ const handler: NextApiHandler = async (req) => {
                     padding: "16px",
                   }}
                 >
-                  <div style={{ display: "flex", fontSize: "26px", fontWeight: "bold" }}>{duration}d</div>
-                  <div style={{ display: "flex", fontSize: "16px", fontWeight: "bold" }}>Duration</div>
+                  <div style={{ display: "flex", fontSize: "26px", fontWeight: "bold" }}>        {formatNumber(
+                    denominate(
+                      streamData.balance,
+                      2,
+                      tokenMetadata?.decimals
+                    ).toNumber()
+                  )}</div>
+                  <div style={{ display: "flex", fontSize: "16px", fontWeight: "bold" }}>Balance</div>
                 </div>
                 <div
                   style={{
@@ -145,9 +167,9 @@ const handler: NextApiHandler = async (req) => {
                   }}
                 >
                   <div style={{ display: "flex", fontSize: "26px", fontWeight: "bold" }}>
-                    {streamData.stream.can_cancel ? "Yes" : "No"}
+                    {durationInDays}d
                   </div>
-                  <div style={{ display: "flex", fontSize: "16px", fontWeight: "bold" }}>Cancelable</div>
+                  <div style={{ display: "flex", fontSize: "16px", fontWeight: "bold" }}>Duration</div>
                 </div>
               </div>
             </div>
