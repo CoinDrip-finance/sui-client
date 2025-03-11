@@ -42,15 +42,43 @@ export interface IStreamResource {
   token: string;
   cliff: string;
   segments: ISegment[];
-  createdAt: Date;
+  createdAt?: Date;
   remaining_balance: string;
+  claims?: IClaimResource[];
+}
+
+interface IStreamFieldsSegment {
+  type: string;
+  fields: {
+    amount: string;
+    exponent: number;
+    duration: string;
+  }
+}
+
+export interface IStreamFields {
+  balance: string;
+  cliff: string;
+  end_time: string;
+  id: {
+    id: string;
+  };
+  image_url: string;
+  initial_deposit: string;
+  name: string;
+  segments: IStreamFieldsSegment[];
+  sender: string;
+  start_time: string;
+  token: string;
 }
 
 export interface IClaimResource {
-  id: number;
-  created_at: string;
-  tx_hash: string;
+  dbld: string
+  stream_id: string;
+  claimed_by: string;
   amount: string;
+  remaining_balance: string;
+  createdAt: Date;
 }
 
 export interface IStreamResponse {

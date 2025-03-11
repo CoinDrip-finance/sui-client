@@ -1,37 +1,49 @@
-import { useAuth } from '@elrond-giants/erd-react-hooks';
-import { ParentSize } from '@visx/responsive';
 import axios from 'axios';
 import { NextSeo } from 'next-seo';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import useSWR from 'swr';
 
 import BackButtonWrapper from '../../../components/shared/BackWrapper';
 import Layout from '../../../components/shared/Layout';
-import Nft from '../../../components/stream_details/Nft';
 import Overview from '../../../components/stream_details/Overview';
 import SenderRecipientDetails from '../../../components/stream_details/SenderRecipient';
-import StreamActions from '../../../components/stream_details/StreamActions';
-import StreamChart from '../../../components/stream_details/StreamChart';
-import StreamProgressBars from '../../../components/stream_details/StreamProgressBars';
-import StreamProps from '../../../components/stream_details/StreamProps';
-import { network } from '../../../config';
-import { useTransaction } from '../../../hooks/useTransaction';
-import { IStreamResponse } from '../../../types';
+import { IStreamFields, IStreamResource } from '../../../types';
 import { homePath } from '../../../utils/routes';
+
+import type { NextPage } from "next";
+import { useSuiClientQuery } from '@mysten/dapp-kit';
+import useSWR from 'swr';
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
-import type { NextPage } from "next";
 const StreamDetails: NextPage = () => {
-  const { address, logout, balance, nonce } = useAuth();
-  const { makeTransaction } = useTransaction();
   const router = useRouter();
   const [paymentTokenImage, setPaymentTokenImage] = useState<string>();
 
-  const { data, isLoading, error, mutate } = useSWR<IStreamResponse>(`/api/stream/${router.query.id}`, fetcher, {
+  const { data, isLoading, error, mutate } = useSWR<IStreamResource>(`/api/stream/${router.query.id}`, fetcher, {
     refreshInterval: 1000 * 60,
   });
+
+  const { data: streamObject } = useSuiClientQuery(
+    'getObject',
+    {
+      id: router.query.id as string,
+      options: {
+        showContent: true,
+        showOwner: true,
+      },
+    },
+  );
+
+  const { data: coinMetadata } = useSuiClientQuery(
+    'getCoinMetadata',
+    {
+      coinType: data?.token!,
+    },
+    {
+      enabled: !!data?.token
+    }
+  );
 
   useEffect(() => {
     if (isLoading) return;
@@ -40,19 +52,12 @@ const StreamDetails: NextPage = () => {
   }, [data, isLoading, error]);
 
   useEffect(() => {
-    if (!data?.stream?.payment?.token_identifier) return;
-    if (data?.stream?.payment?.token_identifier === "EGLD") {
-      setPaymentTokenImage("/new_stream/egld_icon.png");
-      return;
-    }
-    (async () => {
-      const { data: tokenData } = await axios.get(
-        `${network.apiAddress}/tokens/${data?.stream?.payment?.token_identifier}`
-      );
+    setPaymentTokenImage(coinMetadata?.iconUrl!); // TODO: Maybe use a placeholder
+  }, [coinMetadata]);
 
-      setPaymentTokenImage(tokenData?.assets?.svgUrl || tokenData?.assets?.pngUrl);
-    })();
-  }, [data?.stream?.payment?.token_identifier]);
+  const recipientAddress = useMemo(() => {
+    return streamObject?.data?.owner || data?.claims?.[0]?.claimed_by
+  }, [data, streamObject]);
 
   if (isLoading) {
     return (
@@ -79,11 +84,11 @@ const StreamDetails: NextPage = () => {
   return (
     <Layout>
       <NextSeo
-        title={`Stream #${data.id}`}
+        title={`Stream #${data.stream_id}`}
         openGraph={{
           images: [
             {
-              url: `https://devnet-v2.coindrip.finance/api/stream/${data.id}/og-image`,
+              url: `https://devnet-v2.coindrip.finance/api/stream/${data.stream_id}/og-image`,
               width: 1200,
               height: 650,
               type: "image/png",
@@ -92,11 +97,11 @@ const StreamDetails: NextPage = () => {
         }}
       />
       <BackButtonWrapper href={homePath} size="max-w-screen-md">
-        <Overview data={data} tokenIcon={paymentTokenImage} />
+        <Overview data={data} tokenMetadata={coinMetadata!} tokenIcon={paymentTokenImage} />
 
-        <SenderRecipientDetails data={data} />
+        <SenderRecipientDetails senderAddress={data.sender} recipientAddress={recipientAddress?.AddressOwner} />
 
-        <StreamProps data={data} />
+        {/* <StreamProps data={data} />
 
         <StreamProgressBars data={data} />
 
@@ -104,7 +109,7 @@ const StreamDetails: NextPage = () => {
 
         <ParentSize>{({ width, height }) => <StreamChart width={width} height={300} stream={data} />}</ParentSize>
 
-        <Nft data={data} />
+        <Nft data={data} /> */}
       </BackButtonWrapper>
     </Layout>
   );

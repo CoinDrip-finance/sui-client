@@ -18,7 +18,7 @@ export const streamTypes: StreamItemType[] = [
     id: StreamType.Steps,
     title: "Unlock in steps",
     description: "Traditional vesting contract with periodical unlocks.",
-    locked: true,
+    locked: false,
   },
   {
     id: StreamType.Exponential,

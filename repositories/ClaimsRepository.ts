@@ -5,13 +5,13 @@ import { BaseRepository } from './BaseRepository';
 export class ClaimsRepository extends BaseRepository<IClaimResource> {
   constructor() {
     const table = supabase.from(getTableName(CLAIMS_TABLE));
-    super(table, "id");
+    super(table, "stream_id");
   }
 
   async getClaimsByStream(streamId: number) {
     const { data, count } = await this._table
       .select("*", { count: "exact" })
-      .eq("id", streamId)
+      .eq(this._idField, streamId)
       .order("created_at", { ascending: false });
 
     return { data, count };

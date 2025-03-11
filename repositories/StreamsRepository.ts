@@ -50,7 +50,7 @@ export class StreamsRepository extends BaseRepository<IStreamResource> {
     if (!this._idField) throw new Error("Unique ID not provided.");
 
     return this._table
-      .select(`*, canceled:${getTableName('asd')}(streamed_until_cancel)`)
+      .select(`*`)
       .eq(this._idField, id)
       .single();
   }

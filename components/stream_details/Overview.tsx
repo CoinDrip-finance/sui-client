@@ -1,20 +1,25 @@
 import { useMemo } from 'react';
 
-import { IStreamResponse } from '../../types';
-import { formatNumber, getAmountStreamed, getClaimedAmount, getDepositAmount } from '../../utils/presentation';
+import { IStreamFields, IStreamResource, IStreamResponse } from '../../types';
+import { extractTokenName, formatNumber, getAmountStreamed, getClaimedAmount, getDepositAmount } from '../../utils/presentation';
+import { CoinMetadata } from '@mysten/sui/client';
+import { denominate } from '../../utils/economics';
 
-export default function Overview({ data, tokenIcon }: { data: IStreamResponse; tokenIcon?: string }) {
+export default function Overview({ data, tokenMetadata, tokenIcon }: { data: IStreamResource; tokenMetadata: CoinMetadata; tokenIcon?: string }) {
   const amountStreamed = useMemo(() => {
-    return formatNumber(getAmountStreamed(data).value);
-  }, [data]);
+    getAmountStreamed(data).value
+    return formatNumber(denominate(getAmountStreamed(data).value, 5, tokenMetadata?.decimals || 9).toNumber());
+  }, [data, tokenMetadata]);
 
   const deposit = useMemo(() => {
-    return formatNumber(getDepositAmount(data));
-  }, [data]);
+    if (!data || !tokenMetadata) return '0';
+    return formatNumber(getDepositAmount(data, tokenMetadata));
+  }, [data, tokenMetadata]);
 
   const claimed = useMemo(() => {
-    return formatNumber(getClaimedAmount(data).value);
-  }, [data]);
+    if (!data || !tokenMetadata) return '0';
+    return formatNumber(denominate(getClaimedAmount(data, tokenMetadata).value, 5, tokenMetadata?.decimals || 9).toNumber());
+  }, [data, tokenMetadata]);
 
   return (
     <>
@@ -27,10 +32,10 @@ export default function Overview({ data, tokenIcon }: { data: IStreamResponse; t
             <div className="h-8 w-8 bg-primary rounded-full"></div>
           )}
           <div className="font-medium text-5xl">{amountStreamed}</div>
-          <div className="font-medium text-xl text-primary">{data?.stream?.payment?.token_name}</div>
+          <div className="font-medium text-xl text-primary">{extractTokenName(data.token)}</div>
         </div>
         <div className="font-medium text-lg text-neutral-400">
-          out of {deposit} {data?.stream?.payment?.token_name}
+          out of {deposit} {extractTokenName(data.token)}
         </div>
       </div>
 
@@ -38,7 +43,7 @@ export default function Overview({ data, tokenIcon }: { data: IStreamResponse; t
         <div>Amount Claimed</div>
         <div className="flex items-center space-x-6">
           <div className="font-medium text-4xl">{claimed}</div>
-          <div className="font-medium text-xl text-primary">{data?.stream?.payment?.token_name}</div>
+          <div className="font-medium text-xl text-primary">{extractTokenName(data.token)}</div>
         </div>
       </div>
     </>

@@ -3,8 +3,9 @@ import BigNumber from "bignumber.js";
 import moment from "moment";
 
 import { network } from "../config";
-import { IStreamResource, IStreamResponse, StreamStatus } from "../types";
+import { IStreamFields, IStreamResource, IStreamResponse, StreamStatus } from "../types";
 import { denominate } from "./economics";
+import { CoinMetadata } from "@mysten/sui/dist/cjs/client";
 
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -78,34 +79,30 @@ export const formatNumber = (num: number, precision = 2) => {
   return num;
 };
 
-export const getDepositAmount = (data: IStreamResponse): number => {
-  if (!data?.stream?.payment?.amount) return 0;
-  return denominate(data.stream.payment.amount, 5, data.stream.payment.token_decimals).toNumber();
+export const getDepositAmount = (data: IStreamResource, tokenMetadata: CoinMetadata): number => {
+  return denominate(data.amount, 5, tokenMetadata?.decimals || 9).toNumber();
 };
 
-export const getClaimedAmount = (data: IStreamResponse): { value: number; percent: string } => {
-  const balance = denominate(
-    data?.stream?.balance?.claimed_amount || 0,
-    5,
-    data.stream.payment.token_decimals
-  ).toNumber();
-  const fullDeposit = getDepositAmount(data);
+export const getClaimedAmount = (data: IStreamResource, tokenMetadata: CoinMetadata): { value: number; percent: string } => {
+  const deposit = parseInt(data.amount);
+  const balance = parseInt(data?.remaining_balance || data.amount);
+  const claimedAmount = deposit - balance;
+  const percent = ((claimedAmount * 100) / deposit).toFixed(0);
+
   return {
-    value: balance,
-    percent: ((balance * 100) / fullDeposit).toFixed(0),
+    value: denominate(balance, 5, tokenMetadata.decimals).toNumber(),
+    percent,
   };
 };
 
-export const getAmountStreamed = (data: IStreamResponse): { value: number; percent: string } => {
-  let streamed = new BigNumber(data?.stream?.balance?.streamed_amount || 0);
-  if (data?.stream?.balance?.streamed_until_cancel) {
-    streamed = new BigNumber(data?.stream?.balance?.streamed_until_cancel);
-  }
-
-  const balance = denominate(streamed.toString(), 5, data.stream.payment.token_decimals).toNumber();
-  const fullDeposit = getDepositAmount(data);
+export const getAmountStreamed = (data: IStreamResource): { value: number; percent: string } => {
+  const currentTime = new Date().getTime();
+  const startTime = parseInt(data.start_time);
+  const endTime = parseInt(data.end_time);
+  const percent = ((currentTime - startTime) / (endTime - startTime));
+  const value = parseInt(data.amount) * percent;
   return {
-    value: balance,
-    percent: ((balance * 100) / fullDeposit).toFixed(0),
+    value: Math.min(value, parseInt(data.amount)),
+    percent: (percent * 100).toFixed(0),
   };
 };
