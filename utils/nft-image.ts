@@ -8,12 +8,17 @@ export const generateNftSvg = async (
   tokenIdentifier: string,
   balance: number,
   decimals: number,
-  duration: number
+  duration: number,
+  percent: number
 ): Promise<string> => {
   const streamBaseColor = await generateRandomHSLColor(seed);
   const streamBaseColorSecondary = await generateRandomHSLColor(seed, 0.6);
+  const streamBaseColorProgressBar = await generateRandomHSLColor(seed, 0.4);
+  const streamBaseColorProgressBarSecondary = await generateRandomHSLColor(seed, 0.15);
 
   const durationString = duration === 0 ? "&lt; 1 Day" : duration === 1 ? "1 Day" : `${duration} Days`;
+
+  const progressWidth = (percent / 100) * 550;
   return svgSlim(`<svg xmlns="http://www.w3.org/2000/svg"
   xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000" fill="none"
   xmlns:v="https://vecta.io/nano">
@@ -36,6 +41,12 @@ export const generateNftSvg = async (
         <text x="674" y="770" font-size="22" class="F">Balance</text>
       </g>
   </g>
+  
+    <!-- Progress bar background -->
+  <rect x="225" y="880" width="550" height="10" rx="7" ry="7" fill="${streamBaseColorProgressBarSecondary}"/>
+  <!-- Progress bar fill -->
+  <rect x="225" y="880" width="${progressWidth}" rx="7" ry="7" height="10" fill="${streamBaseColorProgressBar}"/>
+
   <path id="A" fill="none" d="M125 45h750s80 0 80 80v750s0 80-80 80H125s-80 0-80-80V125s0-80 80-80"/><text x="140" y="815" font-size="22" class="B F">${tokenIdentifier}</text><text x="674" y="815" font-size="22" class="B F">${denominate(balance, 1, decimals)}</text><text x="409" y="815" font-size="22" class="B F">${durationString}</text><defs>
 <linearGradient id="B" x1="1216.83" y1="-468.569" x2="-109.524" y2="1314.32" xlink:href="#P">
   <stop stop-color="${streamBaseColor}"/>

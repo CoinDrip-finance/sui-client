@@ -9,11 +9,8 @@ interface DurationModalProps {
 
 export default function ScanAddressModal({ open, onClose }: DurationModalProps) {
   const closeWrapper = (address?: string) => {
-    if (address?.startsWith("erd1")) onClose(address);
-    else if (address?.startsWith("multiversx:erd1")) {
-      const parsedAddress = address.replace("multiversx:", "").slice(0, 62);
-      onClose(parsedAddress);
-    } else {
+    if (address?.startsWith("0x")) onClose(address);
+    else {
       onClose();
     }
   };

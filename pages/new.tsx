@@ -1,4 +1,3 @@
-import { useAuth } from '@elrond-giants/erd-react-hooks';
 import { AcademicCapIcon, InformationCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { joiResolver } from '@hookform/resolvers/joi';
 import BigNumber from 'bignumber.js';
@@ -25,6 +24,16 @@ import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit';
 import { Transaction } from "@mysten/sui/transactions";
 import { CoinStruct, PaginatedCoins } from '@mysten/sui/dist/cjs/client';
 import { useTransaction } from '../hooks/useTransaction';
+
+export interface CreateStreamAiInput {
+  wallet_address: string;
+  duration: string;
+  amount: string;
+  token: string;
+  cliff?: string;
+  stream_type: string;
+  step_count?: string;
+}
 
 const mergeAndSplitCoins = (tx: Transaction, coins: CoinStruct[], amount: string) => {
   const [coin] = coins.splice(0, 1);
@@ -63,12 +72,15 @@ const Home: NextPage = () => {
   });
   const {
     handleSubmit,
+    setValue
   } = formMethods;
 
   const [streamType, setStreamType] = useState<StreamItemType>();
   const [selectedToken, setSelectedToken] = useState<TokenWithMetadata>();
   const [loading, setLoading] = useState(false);
   const { sendTransaction } = useTransaction();
+
+  const [aiInput, setAiInput] = useState<CreateStreamAiInput>();
 
   const { data: accountCoins } = useSuiClientQuery(
     'getCoins',
@@ -79,10 +91,21 @@ const Home: NextPage = () => {
   );
 
   useEffect(() => {
-    if (!router?.query?.type) return;
+    if (!router?.query?.stream_type) return;
 
-    setStreamType(streamTypes.find((e) => e.id === router.query.type));
-  }, [router?.query?.type]);
+    setStreamType(streamTypes.find((e) => e.id === router.query.stream_type));
+  }, [router?.query?.stream_type]);
+
+  useEffect(() => {
+    setStreamType(streamTypes.find((e) => e.id === router.query.stream_type));
+
+    // @ts-ignore
+    setAiInput(router?.query as CreateStreamAiInput);
+
+    if (router?.query?.step_count) {
+      setValue("steps_count", parseInt(router.query.step_count as string));
+    }
+  }, [router?.query]);
 
   const createStream = async (formData: ICreateStream) => {
     if (!account?.address) return;
@@ -95,13 +118,11 @@ const Home: NextPage = () => {
         segments = Segments.fromNewStream(formData, amountBigNumber);
       } else {
         segments = new Segments({
-          duration: formData.duration,
+          duration: formData.duration.toString(),
           amount: amountBigNumber.toString(),
           exponent: isExponentialType ? 3 : 1,
         });
       }
-
-      console.log(formData)
 
       const tx = new Transaction();
       tx.setSender(account.address);
@@ -167,17 +188,19 @@ const Home: NextPage = () => {
 
             <FormProvider {...formMethods}>
               <form className="flex flex-col space-y-4" onSubmit={handleSubmit(createStream)}>
-                <TokenSelect onSelect={(token) => setSelectedToken(token)} />
+                <TokenSelect onSelect={(token) => setSelectedToken(token)} aiInput={aiInput} />
 
-                <AmountInput token={selectedToken} />
+                <AmountInput token={selectedToken} aiInput={aiInput} />
 
-                <RecipientInput />
+                <RecipientInput aiInput={aiInput} />
 
-                <DurationInput label="Duration" formId="duration" />
+                <DurationInput label="Duration" formId="duration" aiInput={aiInput} />
 
                 {isCliffType && <DurationInput label="Cliff" formId="cliff" />}
 
                 {isStepsType && <NumberInput label="Steps Count" formId="steps_count" />}
+
+                {router?.query?.ai && <p className='text-xs mt-2 text-orange-400'>Data filled with AI. Please make sure all the data is correct before signing the transaction.</p>}
 
                 <button
                   className="primary-action-button disabled:cursor-not-allowed disabled:opacity-70"

@@ -30,8 +30,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const streamData = streamObject?.data?.content?.fields;
 
   const tokenMetadata = await client.getCoinMetadata({
-    coinType: streamData.token
+    coinType: streamData?.token
   });
+
+  const percentDone = Math.min(moment().diff(parseInt(streamData.start_time), 'ms') / (parseInt(streamData.end_time) - parseInt(streamData.start_time)) * 100, 100);
 
   const durationInDays = moment(parseInt(streamData.end_time)).diff(moment(parseInt(streamData.start_time)), "days");
   const svg = await generateNftSvg(
@@ -40,7 +42,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     extractTokenName(streamData.token),
     streamData.balance,
     tokenMetadata?.decimals!,
-    durationInDays
+    durationInDays,
+    percentDone
   );
 
   return new Response(svg, {

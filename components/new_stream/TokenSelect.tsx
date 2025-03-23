@@ -1,4 +1,3 @@
-import { useAuth } from '@elrond-giants/erd-react-hooks/dist';
 import { Combobox } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import axios from 'axios';
@@ -10,10 +9,12 @@ import { classNames, extractTokenName } from '../../utils/presentation';
 import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit';
 import { CoinBalance, CoinMetadata } from '@mysten/sui/dist/cjs/client';
 import { TokenSelectItem } from './TokenSelectItem';
+import { CreateStreamAiInput } from '../../pages/new';
+import ai from '../../pages/api/stream/ai';
 
 export type TokenWithMetadata = CoinBalance & CoinMetadata;
 
-export default function TokenSelect({ onSelect }: { onSelect: (token: TokenWithMetadata) => void }) {
+export default function TokenSelect({ onSelect, aiInput }: { onSelect: (token: TokenWithMetadata) => void; aiInput?: CreateStreamAiInput }) {
   const account = useCurrentAccount();
   const [query, setQuery] = useState("");
   const [selectedPerson, _setSelectedPerson] = useState<CoinBalance>();
@@ -33,6 +34,14 @@ export default function TokenSelect({ onSelect }: { onSelect: (token: TokenWithM
     },
   );
 
+  useEffect(() => {
+    if (aiInput?.token && tokens) {
+      const token = tokens?.find((token) => token.coinType === aiInput.token.replace(/0x0+/, "0x"));
+      if (token) {
+        setSelectedPerson(token);
+      }
+    }
+  }, [aiInput, tokens]);
 
   const filteredPeople = useMemo(() => {
     if (!tokens) return [];

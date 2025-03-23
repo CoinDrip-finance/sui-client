@@ -5,18 +5,26 @@ import { useFormContext } from 'react-hook-form';
 import { denominate } from '../../utils/economics';
 import { formatNumber } from '../../utils/presentation';
 import { TokenWithMetadata } from './TokenSelect';
+import { CreateStreamAiInput } from '../../pages/new';
 
-export default function AmountInput({ token }: { token?: TokenWithMetadata }) {
+export default function AmountInput({ token, aiInput }: { token?: TokenWithMetadata; aiInput?: CreateStreamAiInput }) {
   const { setValue, register } = useFormContext();
   const [maxBalance, setMaxBalance] = useState<BigNumber>(new BigNumber(0));
+
+  useEffect(() => {
+    if (aiInput?.amount) {
+      setValue("amount", parseInt(aiInput.amount));
+    }
+  }, [aiInput]);
 
   useEffect(() => {
     setMaxBalance(new BigNumber(token?.totalBalance || 0));
   }, [token]);
 
   useEffect(() => {
-    setValue("amount", null);
-  }, [token?.coinType]);
+    if (!aiInput)
+      setValue("amount", null);
+  }, [token?.coinType, aiInput]);
 
   const maxBalanceLabel = useMemo(() => {
     const number = denominate(maxBalance.toString(), 2, token?.decimals).toNumber();

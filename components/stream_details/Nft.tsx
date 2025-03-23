@@ -36,7 +36,7 @@ export default function Nft({ data }: { data: IStreamResource }) {
             <div>{getShortAddress(data.stream_id, 14)}</div>
             <div className="text-neutral-400 text-xs flex items-center">
               <a
-                href={`${network.explorerAddress}/nfts/${data.stream_id}`}
+                href={`${process.env.NEXT_PUBLIC_EXPLORER}/object/${data.stream_id}`}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:underline"

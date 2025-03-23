@@ -1,9 +1,8 @@
-import { useAuth } from '@elrond-giants/erd-react-hooks/dist';
 import { LockClosedIcon } from '@heroicons/react/20/solid';
 import Link from 'next/link';
 
 import { StreamType } from '../../types';
-import { authPath, newStreamPath } from '../../utils/routes';
+import { authPath, newStreamPathType } from '../../utils/routes';
 import { ConnectModal, useCurrentAccount } from '@mysten/dapp-kit';
 import { useMemo, useState } from 'react';
 
@@ -38,7 +37,7 @@ export default function StreamTypeItem({ item }: { item: StreamItemType }) {
             Coming soon
           </button>
         ) : authenticated ? (
-          <Link href={newStreamPath(item.id)}>
+          <Link href={newStreamPathType(item.id)}>
             <button className="auth-button py-1 font-sm w-40">Pick this</button>
           </Link>
         ) : (

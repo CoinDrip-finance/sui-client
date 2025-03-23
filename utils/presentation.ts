@@ -90,20 +90,20 @@ export const getClaimedAmount = (data: IStreamResource, tokenMetadata: CoinMetad
   const percent = ((claimedAmount * 100) / deposit).toFixed(0);
 
   return {
-    value: denominate(balance, 5, tokenMetadata?.decimals || 9).toNumber(),
+    value: denominate(claimedAmount, 5, tokenMetadata?.decimals || 9).toNumber(),
     percent,
   };
 };
 
-export const getAmountStreamed = (data: IStreamResource): { value: number; percent: string } => {
+export const getAmountStreamed = (data: IStreamResource, tokenMetadata: CoinMetadata): { value: number; percent: string } => {
   const currentTime = new Date().getTime();
   const startTime = data.start_time;
   const endTime = data.end_time;
-  const percent = ((currentTime - startTime) / (endTime - startTime));
+  const percent = Math.min(((currentTime - startTime) / (endTime - startTime)), 1);
   const value = parseInt(data.amount) * percent;
 
   return {
-    value: Math.min(value, parseInt(data.amount)),
+    value: denominate(Math.min(value, parseInt(data.amount)), 5, tokenMetadata?.decimals || 9).toNumber(),
     percent: (percent * 100).toFixed(0),
   };
 };

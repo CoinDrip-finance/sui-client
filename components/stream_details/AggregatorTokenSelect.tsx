@@ -6,63 +6,66 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { chainId, mediaUrl } from '../../config';
 import { classNames } from '../../utils/presentation';
+import { useCurrentAccount } from '@mysten/dapp-kit';
+import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
+import axios from 'axios';
+import { symbol } from 'joi';
 
-const getTokenMediaUrl = (token: string) => {
-  if (token === "EGLD") {
-    return "/new_stream/egld_icon.png";
-  }
-
-  return `${mediaUrl}/tokens/asset/${token}/logo.png`;
-};
+export interface AggregatorToken {
+  type: string;
+  decimals: number;
+  symbol: string;
+  name: string;
+  iconUrl: string;
+  verified?: boolean;
+}
 
 export default function AggregatorTokenSelect({
   defaultToken,
   onSelect,
 }: {
   defaultToken: string;
-  onSelect: (token: string | null) => void;
+  onSelect: (token: AggregatorToken | null) => void;
 }) {
-  const { address } = useAuth();
+  const account = useCurrentAccount();
+  const address = account?.address;
   const [query, setQuery] = useState("");
-  const [selectedPerson, _setSelectedPerson] = useState<string>();
-  const [tokens, setTokens] = useState<string[]>([]);
+  const [selectedPerson, _setSelectedPerson] = useState<AggregatorToken>();
+  const [tokens, setTokens] = useState<AggregatorToken[]>([]);
+  const [verifiedTokens, setVerifiedTokens] = useState<AggregatorToken[]>([]);
   const [canUseAggregator, setCanUseAggregator] = useState(true);
 
   useEffect(() => {
-    _setSelectedPerson(defaultToken);
-  }, [defaultToken]);
+    _setSelectedPerson(tokens?.find(e => e.type === `0x${defaultToken}`));
+  }, [defaultToken, tokens]);
 
   useEffect(() => {
     (async () => {
-      // @ts-ignore
-      const agService = new Aggregator({ chainId });
-      const ashTokens = await agService.getTokens();
-
-      const tokens = ashTokens.map((e) => e.id);
-
-      if (!tokens.includes(defaultToken)) {
-        if (defaultToken === "EGLD") {
-          tokens.unshift(defaultToken);
-        } else {
-          setCanUseAggregator(false);
-        }
+      const { data }: { data: AggregatorToken[] } = await axios.get('/api/tokens');
+      if (!data.filter(e => e.type).length) {
+        setCanUseAggregator(false);
+      } else {
+        setTokens(data);
+        setVerifiedTokens(data.filter(e => e?.verified));
       }
-      setTokens(tokens);
     })();
   }, []);
 
   const filteredPeople = useMemo(() => {
-    return query === ""
-      ? tokens
+    return query.length < 3
+      ? verifiedTokens
       : tokens.filter((token) => {
-          return token.toLowerCase().includes(query.toLowerCase());
-        });
-  }, [query, tokens]);
+        return token.name.toLowerCase().includes(query.toLowerCase());
+      }).sort((a, b) => {
+        if (a.verified === b.verified) return 0;
+        return a.verified ? -1 : 1;
+      }).slice(0, 500);
+  }, [query, tokens, verifiedTokens]);
 
-  const setSelectedPerson = (token: string) => {
+  const setSelectedPerson = (token: AggregatorToken) => {
     _setSelectedPerson(token);
 
-    if (token !== defaultToken) {
+    if (token.type !== defaultToken) {
       onSelect(token);
     } else {
       onSelect(null);
@@ -80,9 +83,9 @@ export default function AggregatorTokenSelect({
             <Combobox.Input
               className="block w-full cursor-pointer rounded-lg bg-neutral-800 px-12 h-12 text-white font-medium text-sm border border-neutral-700 border:border-neutral-800 focus:border-neutral-800 focus:outline-none"
               onChange={(event) => setQuery(event.target.value)}
-              displayValue={(token: string) => token}
+              displayValue={(token: AggregatorToken) => token.name}
               autoComplete="false"
-              readOnly={true}
+              readOnly={false}
             />
             <div className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
               <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -91,7 +94,7 @@ export default function AggregatorTokenSelect({
 
           {selectedPerson && (
             <div className="absolute inset-y-0 left-4 flex items-center">
-              <img src={getTokenMediaUrl(selectedPerson)} alt="" className="h-6 w-6 rounded-full" />
+              <img src={selectedPerson.iconUrl} alt="" className="h-6 w-6 rounded-full" />
             </div>
           )}
 
@@ -99,7 +102,7 @@ export default function AggregatorTokenSelect({
             <Combobox.Options className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-lg bg-neutral-800 py-1 text-sm shadow-lg ring-1 ring-neutral-700 focus:outline-none font-medium">
               {filteredPeople.map((token) => (
                 <Combobox.Option
-                  key={token}
+                  key={token.type}
                   value={token}
                   className={({ active }) =>
                     classNames(
@@ -111,8 +114,8 @@ export default function AggregatorTokenSelect({
                   {({ active, selected }) => (
                     <>
                       <div className="flex items-center">
-                        <img src={getTokenMediaUrl(token)} alt="" className="h-6 w-6 flex-shrink-0 rounded-full mr-3" />
-                        <span className={classNames("truncate", selected ? "text-white" : "")}>{token}</span>
+                        <img src={token.iconUrl} alt="" className="h-6 w-6 flex-shrink-0 rounded-full mr-3" />
+                        <span className={classNames("truncate", selected ? "text-white" : "")}>{token.name}</span>
                       </div>
 
                       {selected && (

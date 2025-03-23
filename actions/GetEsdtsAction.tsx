@@ -7,19 +7,10 @@ import BaseAction from './_base/BaseAction';
 
 export default class GetEsdtAction extends BaseAction {
   async handle(req: NextApiRequest): Promise<ApiResponse<any>> {
-    const { address } = req.query;
-
-    const { data } = await axios.get(`${network.apiAddress}/accounts/${address}/tokens?from=0&size=10000`);
+    const { data } = await axios.get(process.env.NEXT_PUBLIC_ALL_TOKENS_API!);
 
     return new ApiResponse({
-      body: data.map((token: any) => {
-        return {
-          identifier: token.identifier,
-          icon: token?.assets?.pngUrl,
-          decimals: token.decimals,
-          balance: token.balance,
-        };
-      }),
+      body: data
     });
   }
 }

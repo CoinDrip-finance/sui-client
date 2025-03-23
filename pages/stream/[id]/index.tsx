@@ -61,8 +61,9 @@ const StreamDetails: NextPage = () => {
     setPaymentTokenImage(coinMetadata?.iconUrl!); // TODO: Maybe use a placeholder
   }, [coinMetadata]);
 
-  const recipientAddress = useMemo(() => {
-    return streamObject?.data?.owner || data?.claims?.[0]?.claimed_by
+  const recipientAddress = useMemo<string>(() => {
+    // @ts-ignore
+    return streamObject?.data?.owner?.AddressOwner || data?.claims?.[0]?.claimed_by
   }, [data, streamObject]);
 
   if (isLoading) {
@@ -105,14 +106,13 @@ const StreamDetails: NextPage = () => {
       <BackButtonWrapper href={homePath} size="max-w-screen-md">
         <Overview data={data} tokenMetadata={coinMetadata!} tokenIcon={paymentTokenImage} />
 
-        {/* @ts-ignore */}
-        <SenderRecipientDetails senderAddress={data.sender} recipientAddress={recipientAddress?.AddressOwner} />
+        <SenderRecipientDetails senderAddress={data.sender} recipientAddress={recipientAddress} />
 
         <StreamProps data={data} tokenMetadata={coinMetadata!} />
 
         <StreamProgressBars data={data} tokenMetadata={coinMetadata!} />
 
-        {/* <StreamActions data={data} refresh={mutate} /> */}
+        <StreamActions data={data} tokenMetadata={coinMetadata!} streamRecipient={recipientAddress} refresh={mutate} />
 
         <ParentSize>{({ width, height }) => <StreamChart width={width} height={300} stream={data} tokenMetadata={coinMetadata!} />}</ParentSize>
 

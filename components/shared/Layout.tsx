@@ -1,55 +1,37 @@
-import { useAuth } from "@elrond-giants/erd-react-hooks/dist";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon, LockClosedIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
 
 import ContractAbi from "../../utils/coindrip.abi.json";
-import { classNames, getHerotag, getShortAddress } from "../../utils/presentation";
+import { classNames, getHerotag, getShortAddress } from '../../utils/presentation';
 import { authPath, homePath } from "../../utils/routes";
 import Logo from "./Logo";
 import { ConnectButton } from "@mysten/dapp-kit";
 
-
-interface IUser {
-  herotag?: string;
-  address: string;
-  imageUrl?: string;
+interface NavigationItem {
+  name: string;
+  href: string;
+  current?: boolean;
+  locked?: boolean;
+  icon?: any;
 }
 
-const navigation: any[] = [
-  { name: "Dashboard", href: "/", current: true },
-  { name: "Feedback", href: "https://forms.gle/gXbBRHjk3PK6vsNi6" },
+const navigation: NavigationItem[] = [
+  { name: "Vesting", href: "/", current: true, icon: ShieldCheckIcon },
+  { name: "Payments", href: "/", locked: true },
+  { name: "Airdrops", href: "/", locked: true },
 ];
 const userNavigation: any[] = [];
 
-const Avatar = ({ user }: { user?: IUser }) => {
-  if (user && user?.imageUrl) {
-    return <img className="h-6 w-6 rounded-full" src={user?.imageUrl} alt="" />;
-  }
-  return <div className="h-6 w-6 rounded-full bg-gradient-to-bl from-primary to-secondary"></div>;
-};
+// const Avatar = ({ user }: { user?: IUser }) => {
+//   if (user && user?.imageUrl) {
+//     return <img className="h-6 w-6 rounded-full" src={user?.imageUrl} alt="" />;
+//   }
+//   return <div className="h-6 w-6 rounded-full bg-gradient-to-bl from-primary to-secondary"></div>;
+// };
 
 export default function Layout({ children }: any) {
-  const { address, logout, balance, nonce } = useAuth();
-  const [user, setUser] = useState<IUser>();
-
-  useEffect(() => {
-    if (!address) return;
-    (async () => {
-      const herotag = await getHerotag(address);
-      setUser({
-        address,
-        herotag,
-      });
-    })();
-  }, [address]);
-
-  const shortAddress = useMemo(() => {
-    const addr = address ?? "";
-    return getShortAddress(addr);
-  }, [address]);
-
   return (
     <>
       <div className="min-h-full">
@@ -76,23 +58,7 @@ export default function Layout({ children }: any) {
                     </div>
                     <div className="flex lg:hidden">
                       {/* Mobile menu button */}
-                      {address ? (
-                        <Disclosure.Button className="inline-flex items-center justify-center sm:p-2 text-white focus:outline-none">
-                          <span className="sr-only">Open main menu</span>
-                          <div
-                            className={classNames(
-                              open ? "bg-opacity-10" : "bg-opacity-0",
-                              "flex items-center py-1.5 px-3 bg-white rounded-full border border-white"
-                            )}
-                          >
-                            <Avatar user={user} />
-
-                            <div className="ml-2 text-sm font-medium text-white">{shortAddress}</div>
-                          </div>
-                        </Disclosure.Button>
-                      ) : (
-                        <div className="nav-connect-button"><ConnectButton /></div>
-                      )}
+                      <div className="nav-connect-button"><ConnectButton /></div>
                     </div>
                     <div className="hidden lg:ml-4 lg:block">
                       <div className="flex items-center">
@@ -101,11 +67,11 @@ export default function Layout({ children }: any) {
                             {navigation.map((item) => (
                               <Link
                                 key={item.name}
-                                href={item.href}
-                                className="text-white font-medium hover:underline"
+                                href={item.locked ? '#' : item.href}
+                                className={classNames("flex items-center", item?.locked ? "text-white/80" : "text-white hover:underline")}
                                 aria-current={item.current ? "page" : undefined}
                               >
-                                {item.name}
+                                {item?.locked ? <LockClosedIcon className="w-4 mr-1" /> : <item.icon className="w-4 mr-1" />} {item.name}
                               </Link>
                             ))}
                           </div>
@@ -113,15 +79,7 @@ export default function Layout({ children }: any) {
                         {/* Profile dropdown */}
                         <Menu as="div" className="relative ml-8 flex-shrink-0">
                           <div>
-                            {address ? (
-                              <Menu.Button className="flex items-center py-2 px-3 border border-white bg-white bg-opacity-0 hover:bg-opacity-10 rounded-lg text-white focus:outline-none font-medium">
-                                <span className="sr-only">Open user menu</span>
-                                <Avatar user={user} />
-                                <span className="pl-2">{shortAddress}</span>
-                              </Menu.Button>
-                            ) : (
-                              <div className="nav-connect-button"><ConnectButton /></div>
-                            )}
+                            <div className="nav-connect-button"><ConnectButton /></div>
                           </div>
                           <Transition
                             as={Fragment}
@@ -148,7 +106,7 @@ export default function Layout({ children }: any) {
                                   )}
                                 </Menu.Item>
                               ))}
-                              <Menu.Item>
+                              {/* <Menu.Item>
                                 <a
                                   className={classNames(
                                     "block py-2 px-4 text-sm text-gray-700 cursor-pointer hover:bg-gray-100"
@@ -157,7 +115,7 @@ export default function Layout({ children }: any) {
                                 >
                                   Disconnect
                                 </a>
-                              </Menu.Item>
+                              </Menu.Item> */}
                             </Menu.Items>
                           </Transition>
                         </Menu>
@@ -192,13 +150,13 @@ export default function Layout({ children }: any) {
                           {item.name}
                         </Disclosure.Button>
                       ))}
-                      <Disclosure.Button
+                      {/* <Disclosure.Button
                         as="a"
                         className="block rounded-md py-2 px-3 text-base font-medium text-white hover:bg-opacity-75"
                         onClick={logout}
                       >
                         Disconnect
-                      </Disclosure.Button>
+                      </Disclosure.Button> */}
                     </div>
                   </div>
                 </Disclosure.Panel>

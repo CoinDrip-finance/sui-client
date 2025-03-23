@@ -3,71 +3,92 @@ import { ArrowDownTrayIcon, BanknotesIcon, ChartPieIcon, ClockIcon, KeyIcon, Wal
 import moment from 'moment';
 import { useEffect, useMemo, useState } from 'react';
 import Moment from 'react-moment';
-
+import { swapPTB } from 'navi-aggregator-sdk';
 import { network } from '../../config';
 import { useTransaction } from '../../hooks/useTransaction';
-import { IStreamResponse } from '../../types';
+import { IStreamResource, IStreamResponse, StreamStatus } from '../../types';
 import StreamingContract from '../../utils/contracts/streamContract';
 import { denominate } from '../../utils/economics';
-import { formatNumber, getAmountStreamed, getClaimedAmount, getDepositAmount } from '../../utils/presentation';
-import AggregatorTokenSelect from './AggregatorTokenSelect';
+import { extractTokenName, formatNumber, getAmountStreamed, getClaimedAmount, getDepositAmount, getShortAddress, getStreamStatus } from '../../utils/presentation';
+import AggregatorTokenSelect, { AggregatorToken } from './AggregatorTokenSelect';
 import StreamDetailsBasePopup from './PopupBase';
 import StreamPropItem from './StreamPropItem';
+import { useCurrentAccount } from '@mysten/dapp-kit';
+import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
+import { Transaction } from '@mysten/sui/transactions';
 
 interface ClaimPopupProps {
-  data: IStreamResponse;
+  data: IStreamResource;
+  tokenMetadata: CoinMetadata;
   streamRecipient?: string;
   open: boolean;
   onClose: () => void;
 }
 
-export default function ClaimPopup({ data, open, onClose, streamRecipient }: ClaimPopupProps) {
-  const { address } = useAuth();
-  const { makeTransaction } = useTransaction();
+export default function ClaimPopup({ data, open, onClose, streamRecipient, tokenMetadata }: ClaimPopupProps) {
+  const account = useCurrentAccount();
+  const address = account?.address;
   const [loading, setLoading] = useState(false);
-  const [claimToken, setClaimToken] = useState<string | null>();
+  const [claimToken, setClaimToken] = useState<AggregatorToken | null>();
+  const { sendTransaction } = useTransaction();
+
+  const status = useMemo(() => {
+    return getStreamStatus(data);
+  }, [data])
 
   const onSubmit = async () => {
     if (!address) return;
-    const streamingContract = new StreamingContract(address);
-    let interaction = streamingContract.claimStream(data.id);
-
-    if (claimToken) {
-      interaction = await streamingContract.claimStreamSwap(
-        data.id,
-        data.stream.payment.token_identifier,
-        claimToken,
-        data.stream.balance?.recipient_balance!
-      );
-    }
 
     try {
-      setLoading(true);
-      const txResult = await makeTransaction(interaction.buildTransaction());
-    } finally {
-      setLoading(false);
+      const tx = new Transaction();
+      tx.setSender(account.address);
+      tx.setGasBudget(50_000_000);
+
+      const [coin] = tx.moveCall({
+        target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::claim_from_stream`,
+        typeArguments: [data.token],
+        arguments: [
+          tx.object(data.stream_id),
+          tx.object("0x6")
+        ]
+      });
+
+      tx.transferObjects([coin], account.address);
+
+      if (status === StreamStatus.Settled) {
+        tx.moveCall({
+          target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::destroy_zero`,
+          typeArguments: [data.token],
+          arguments: [
+            tx.object(data.stream_id),
+          ]
+        });
+      }
+
+      await sendTransaction(tx);
       onClose();
-    }
+    } catch (e) { }
   };
 
   const deposited = useMemo(() => {
-    return formatNumber(getDepositAmount(data));
-  }, [data]);
+    return formatNumber(getDepositAmount(data, tokenMetadata));
+  }, [data, tokenMetadata]);
 
   const amountStreamed = useMemo(() => {
-    return getAmountStreamed(data);
-  }, [data]);
+    return getAmountStreamed(data, tokenMetadata);
+  }, [data, tokenMetadata]);
 
   const claimed = useMemo(() => {
-    return getClaimedAmount(data);
-  }, [data]);
+    return getClaimedAmount(data, tokenMetadata);
+  }, [data, tokenMetadata]);
 
   const cliff = useMemo(() => {
-    if (data.stream.cliff === 0) {
+    const cliff = parseInt(data.cliff);
+    if (cliff === 0) {
       return null;
     }
     const currentDate = moment();
-    const cliffEnd = moment(data.stream.start_time).add(data.stream.cliff, "seconds");
+    const cliffEnd = moment(data.start_time).add(cliff, "ms");
 
     if (currentDate >= cliffEnd) {
       return null;
@@ -77,8 +98,8 @@ export default function ClaimPopup({ data, open, onClose, streamRecipient }: Cla
   }, [data]);
 
   const readyToClaim = useMemo(() => {
-    return denominate(data.stream.balance?.recipient_balance || 0, 5, data.stream.payment.token_decimals).toNumber();
-  }, [data.stream.balance?.recipient_balance]);
+    return amountStreamed.value - claimed.value;
+  }, [amountStreamed, claimed]);
 
   return (
     <StreamDetailsBasePopup
@@ -93,22 +114,22 @@ export default function ClaimPopup({ data, open, onClose, streamRecipient }: Cla
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
           <StreamPropItem
             label="Deposited"
-            value={`${deposited} ${data.stream.payment.token_name}`}
+            value={`${deposited} ${extractTokenName(data.token)}`}
             Icon={WalletIcon}
           />
           <StreamPropItem
             label="Streamed"
-            value={`${formatNumber(amountStreamed.value)} ${data.stream.payment.token_name}`}
+            value={`${formatNumber(amountStreamed.value)} ${extractTokenName(data.token)}`}
             Icon={ChartPieIcon}
           />
           <StreamPropItem
             label="Withdrawn"
-            value={`${formatNumber(claimed.value)} ${data.stream.payment.token_name}`}
+            value={`${formatNumber(claimed.value)} ${extractTokenName(data.token)}`}
             Icon={ArrowDownTrayIcon}
           />
           <StreamPropItem
             label="Withdrawable"
-            value={`${formatNumber(readyToClaim)} ${data.stream.payment.token_name}`}
+            value={`${formatNumber(readyToClaim)} ${extractTokenName(data.token)}`}
             Icon={BanknotesIcon}
           />
         </div>
@@ -122,12 +143,12 @@ export default function ClaimPopup({ data, open, onClose, streamRecipient }: Cla
             <p className="font-light mt-2">
               You are not the recipient of the stream. Only the owner of NFT{" "}
               <a
-                href={`${network.explorerAddress}/nfts/${data.nft?.identifier}`}
+                href={`${process.env.NEXT_PUBLIC_EXPLORER}/object/${data.stream_id}`}
                 target="_blank"
                 className="underline"
                 rel="noreferrer"
               >
-                {data.nft?.identifier}
+                {getShortAddress(data.stream_id, 10)}
               </a>{" "}
               can withdraw from this stream.
             </p>
@@ -146,7 +167,7 @@ export default function ClaimPopup({ data, open, onClose, streamRecipient }: Cla
           </div>
         )}
 
-        <AggregatorTokenSelect defaultToken={data.stream.payment.token_identifier} onSelect={setClaimToken} />
+        <AggregatorTokenSelect defaultToken={data.token} onSelect={setClaimToken} />
       </div>
     </StreamDetailsBasePopup>
   );

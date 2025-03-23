@@ -5,6 +5,7 @@ import { useFormContext } from 'react-hook-form';
 import { classNames, getShortAddress } from '../../utils/presentation';
 import ScanAddressModal from './ScanAddressModal';
 import { useSuiClientQuery } from '@mysten/dapp-kit';
+import { CreateStreamAiInput } from '../../pages/new';
 
 const formatName = (name?: string) => {
   if (!name) return '';
@@ -12,7 +13,7 @@ const formatName = (name?: string) => {
   return name + '.sui';
 }
 
-export default function RecipientInput() {
+export default function RecipientInput({ aiInput }: { aiInput?: CreateStreamAiInput }) {
   const { setValue, register } = useFormContext();
   const [recipientInputValue, setRecipientInputValue] = useState<string>();
   const [recipientAddress, setRecipientAddress] = useState<string>();
@@ -33,6 +34,14 @@ export default function RecipientInput() {
       address: recipientInputValue || ''
     },
   );
+
+  useEffect(() => {
+    if (aiInput?.wallet_address) {
+      setRecipientInputValue(aiInput.wallet_address);
+      // @ts-ignore
+      inputRef.current.value = aiInput.wallet_address;
+    }
+  }, [aiInput])
 
   const isAddress = useMemo(() => {
     return recipientInputValue?.startsWith("0x");

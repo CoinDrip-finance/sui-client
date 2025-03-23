@@ -7,8 +7,7 @@ import { denominate } from '../../utils/economics';
 
 export default function Overview({ data, tokenMetadata, tokenIcon }: { data: IStreamResource; tokenMetadata: CoinMetadata; tokenIcon?: string }) {
   const amountStreamed = useMemo(() => {
-    getAmountStreamed(data).value
-    return formatNumber(denominate(getAmountStreamed(data).value, 5, tokenMetadata?.decimals || 9).toNumber());
+    return formatNumber(getAmountStreamed(data, tokenMetadata).value);
   }, [data, tokenMetadata]);
 
   const deposit = useMemo(() => {
@@ -18,7 +17,7 @@ export default function Overview({ data, tokenMetadata, tokenIcon }: { data: ISt
 
   const claimed = useMemo(() => {
     if (!data || !tokenMetadata) return '0';
-    return formatNumber(denominate(getClaimedAmount(data, tokenMetadata).value, 5, tokenMetadata?.decimals || 9).toNumber());
+    return formatNumber(getClaimedAmount(data, tokenMetadata).value);
   }, [data, tokenMetadata]);
 
   return (

@@ -7,8 +7,8 @@ import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
 
 export default function StreamProgressBars({ data, tokenMetadata }: { data: IStreamResource; tokenMetadata: CoinMetadata }) {
   const amountStreamed = useMemo(() => {
-    return getAmountStreamed(data).percent;
-  }, [data]);
+    return getAmountStreamed(data, tokenMetadata).percent;
+  }, [data, tokenMetadata]);
 
   const claimed = useMemo(() => {
     return getClaimedAmount(data, tokenMetadata).percent;

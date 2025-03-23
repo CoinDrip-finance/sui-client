@@ -1,12 +1,13 @@
-import { useAuth } from '@elrond-giants/erd-react-hooks/dist';
 import { useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import DurationModal from './DurationModal';
+import { CreateStreamAiInput } from '../../pages/new';
 
 interface DurationInputProps {
   label: string;
   formId: string;
+  aiInput?: CreateStreamAiInput;
 }
 
 const formatDuration = (ms: number) => {
@@ -24,10 +25,18 @@ const formatDuration = (ms: number) => {
     .join(", ");
 };
 
-export default function DurationInput({ label, formId }: DurationInputProps) {
+export default function DurationInput({ label, formId, aiInput }: DurationInputProps) {
   const { setValue, register } = useFormContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<number | null>();
+
+  useEffect(() => {
+    // @ts-ignore
+    const duration = aiInput?.[formId];
+    if (duration) {
+      onModalClose(parseInt(duration));
+    }
+  }, [aiInput]);
 
   const onModalClose = (duration?: number) => {
     setIsModalOpen(false);
