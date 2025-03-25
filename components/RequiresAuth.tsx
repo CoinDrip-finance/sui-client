@@ -1,4 +1,3 @@
-import { useAuth } from "@elrond-giants/erd-react-hooks";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useCurrentAccount, useCurrentWallet, useAutoConnectWallet } from "@mysten/dapp-kit";

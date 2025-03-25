@@ -1,8 +1,8 @@
-import { BoltIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, WalletIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { BoltIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, WalletIcon } from '@heroicons/react/24/outline';
 import moment from 'moment';
 import { useMemo } from 'react';
 
-import { IStreamResource, IStreamResponse } from '../../types';
+import { IStreamResource } from '../../types';
 import { denominate } from '../../utils/economics';
 import { extractTokenName, getStreamStatus } from '../../utils/presentation';
 import StreamPropItem from './StreamPropItem';

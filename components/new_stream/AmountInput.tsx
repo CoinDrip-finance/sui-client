@@ -7,15 +7,15 @@ import { formatNumber } from '../../utils/presentation';
 import { TokenWithMetadata } from './TokenSelect';
 import { CreateStreamAiInput } from '../../pages/new';
 
-export default function AmountInput({ token, aiInput }: { token?: TokenWithMetadata; aiInput?: CreateStreamAiInput }) {
+export default function AmountInput({ fieldIndex, token, aiInput }: { fieldIndex: number, token?: TokenWithMetadata; aiInput?: CreateStreamAiInput }) {
   const { setValue, register } = useFormContext();
   const [maxBalance, setMaxBalance] = useState<BigNumber>(new BigNumber(0));
 
   useEffect(() => {
     if (aiInput?.amount) {
-      setValue("amount", parseInt(aiInput.amount));
+      setValue(`streams.${fieldIndex}.amount`, parseFloat(aiInput.amount));
     }
-  }, [aiInput]);
+  }, [aiInput, fieldIndex]);
 
   useEffect(() => {
     setMaxBalance(new BigNumber(token?.totalBalance || 0));
@@ -23,7 +23,7 @@ export default function AmountInput({ token, aiInput }: { token?: TokenWithMetad
 
   useEffect(() => {
     if (!aiInput)
-      setValue("amount", null);
+      setValue(`streams.${fieldIndex}.amount`, null);
   }, [token?.coinType, aiInput]);
 
   const maxBalanceLabel = useMemo(() => {
@@ -34,18 +34,18 @@ export default function AmountInput({ token, aiInput }: { token?: TokenWithMetad
   const selectMax = (e: any) => {
     e.preventDefault();
     const number = denominate(maxBalance.toString(), token?.decimals, token?.decimals).toNumber();
-    setValue("amount", number);
+    setValue(`streams.${fieldIndex}.amount`, number);
   };
 
   return (
-    <div>
+    <div className='flex-1'>
       <div className="block font-light text-sm mb-2">Amount</div>
       <div className="relative w-full">
         <input
           type="number"
           className="bg-neutral-950 rounded-lg border border-neutral-900 focus:border-neutral-900 h-12 font-medium text-sm focus:outline-none px-4 w-full"
           step="0.0001"
-          {...register("amount")}
+          {...register(`streams.${fieldIndex}.amount`)}
         />
 
         <button

@@ -10,8 +10,8 @@ import { streamDetailsPath } from "../../utils/routes";
 import ProgressBarSmall from "./ProgressBarSmall";
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 
-const formatDate = (date: string): string => {
-  return moment(parseInt(date)).format("MMM Do 'YY @ H a");
+const formatDate = (date: number): string => {
+  return moment(date).format("MMM Do 'YY @ H a");
 };
 
 export default function StreamTableItem({ stream }: { stream: IStreamResource }) {

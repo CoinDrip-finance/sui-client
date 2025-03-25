@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-export default function NumberInput({ label, formId }: { label: string; formId: string }) {
+export default function NumberInput({ fieldIndex, label, formId }: { fieldIndex: number; label: string; formId: string }) {
   const { register } = useFormContext();
 
   return (
@@ -12,7 +12,7 @@ export default function NumberInput({ label, formId }: { label: string; formId: 
           type="number"
           className="bg-neutral-950 rounded-lg border border-neutral-900 focus:border-neutral-900 h-12 font-medium text-sm focus:outline-none px-4 w-full"
           step="1"
-          {...register(formId)}
+          {...register(`streams.${fieldIndex}.${formId}`)}
         />
       </div>
     </div>

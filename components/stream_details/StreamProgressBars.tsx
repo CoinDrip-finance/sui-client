@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { IStreamResource, IStreamResponse } from '../../types';
+import { IStreamResource } from '../../types';
 import { getAmountStreamed, getClaimedAmount } from '../../utils/presentation';
 import ProgressBarSmall from '../stream_list/ProgressBarSmall';
 import { CoinMetadata } from '@mysten/sui/dist/cjs/client';

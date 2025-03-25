@@ -1,11 +1,11 @@
-import { AcademicCapIcon, InformationCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { AcademicCapIcon, DocumentChartBarIcon, InformationCircleIcon, LockClosedIcon, PencilIcon, PlusCircleIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { joiResolver } from '@hookform/resolvers/joi';
 import BigNumber from 'bignumber.js';
 import Joi from 'joi';
 import { NextSeo } from 'next-seo';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import type { NextPage } from "next";
 import { StreamItemType } from '../components/gallery/StreamTypeItem';
 import AmountInput from '../components/new_stream/AmountInput';
@@ -18,12 +18,15 @@ import BackButtonWrapper from '../components/shared/BackWrapper';
 import Layout from '../components/shared/Layout';
 import { ICreateStream, StreamType } from '../types';
 import { Segments } from '../utils/models/Segments';
-import { galleryPath } from '../utils/routes';
+import { galleryPath, homePath } from '../utils/routes';
 import { streamTypes } from './gallery';
 import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit';
 import { Transaction } from "@mysten/sui/transactions";
 import { CoinStruct, PaginatedCoins } from '@mysten/sui/dist/cjs/client';
 import { useTransaction } from '../hooks/useTransaction';
+import { classNames } from '../utils/presentation';
+import ManualCreateStream from '../components/new_stream/ManualCreateStream';
+import CsvCreateStream from '../components/new_stream/CsvCreateSteram';
 
 export interface CreateStreamAiInput {
   wallet_address: string;
@@ -35,52 +38,80 @@ export interface CreateStreamAiInput {
   step_count?: string;
 }
 
-const mergeAndSplitCoins = (tx: Transaction, coins: CoinStruct[], amount: string) => {
+const mergeAndSplitCoins = (tx: Transaction, coins: CoinStruct[], amounts: string[]) => {
   const [coin] = coins.splice(0, 1);
   if (coins.length) {
     tx.mergeCoins(coin.coinObjectId, coins.map(item => item.coinObjectId));
   }
-  const [splitCoin] = tx.splitCoins(coin.coinObjectId, [amount]);
+  const splitCoin = tx.splitCoins(coin.coinObjectId, amounts);
 
   return splitCoin;
 }
+
+export const streamItemSchema = Joi.object({
+  recipient: Joi.string()
+    .pattern(/^0x[a-fA-F0-9]{64}$/)
+    .required(),
+  amount: Joi.number().positive().required(),
+  duration: Joi.number().positive().required(),
+  cliff: Joi.number().positive().max(Joi.ref("duration")),
+  steps_count: Joi.number().positive().integer(),
+});
+
+const schema = Joi.object<ICreateStream>({
+  payment_token: Joi.string()
+    .pattern(/^0x[a-f0-9]+::.+::.+$/)
+    .required(),
+  streams: Joi.array().items(streamItemSchema).min(1).required(),
+});
 
 const Home: NextPage = () => {
   const account = useCurrentAccount();
   const router = useRouter();
 
-  const schema = Joi.object<ICreateStream>({
-    recipient: Joi.string()
-      .pattern(/^0x[a-fA-F0-9]{64}$/)
-      .custom((data, helper) => {
-        // @ts-ignore
-        if (data === account?.address) return helper.message("You can't stream towards yourself");
-
-        return data;
-      })
-      .required(),
-    payment_token: Joi.string()
-      .pattern(/^0x[a-f0-9]+::.+::.+$/)
-      .required(),
-    amount: Joi.number().positive().required(),
-    duration: Joi.number().positive().required(),
-    cliff: Joi.number().positive().max(Joi.ref("duration")),
-    steps_count: Joi.number().positive().integer(),
-  });
   const formMethods = useForm<ICreateStream>({
     resolver: joiResolver(schema),
+    defaultValues: {
+      streams: [{
+        recipient: "",
+      }]
+    }
   });
   const {
+    control,
     handleSubmit,
     setValue
   } = formMethods;
+
+  const { fields, remove, append } = useFieldArray({
+    control,
+    name: "streams",
+  });
 
   const [streamType, setStreamType] = useState<StreamItemType>();
   const [selectedToken, setSelectedToken] = useState<TokenWithMetadata>();
   const [loading, setLoading] = useState(false);
   const { sendTransaction } = useTransaction();
+  const [creationType, setCreationType] = useState<'manual' | 'csv'>('manual');
 
   const [aiInput, setAiInput] = useState<CreateStreamAiInput>();
+
+  const switchCreationType = (type: 'manual' | 'csv') => {
+    if (type === creationType) return;
+
+    if (type === 'manual') {
+      if (fields.length === 0) {
+        // @ts-ignore
+        append({ recipient: "" });
+      }
+      setCreationType('manual');
+    } else {
+      fields.forEach((field, index) => {
+        remove(index);
+      });
+      setCreationType('csv');
+    }
+  }
 
   const { data: accountCoins } = useSuiClientQuery(
     'getCoins',
@@ -103,7 +134,7 @@ const Home: NextPage = () => {
     setAiInput(router?.query as CreateStreamAiInput);
 
     if (router?.query?.step_count) {
-      setValue("steps_count", parseInt(router.query.step_count as string));
+      setValue("streams.0.steps_count", parseInt(router.query.step_count as string));
     }
   }, [router?.query]);
 
@@ -112,46 +143,56 @@ const Home: NextPage = () => {
 
     try {
       setLoading(true);
-      const amountBigNumber = new BigNumber(formData.amount).shiftedBy(selectedToken?.decimals || 9);
-      let segments;
-      if (isStepsType && formData?.steps_count) {
-        segments = Segments.fromNewStream(formData, amountBigNumber);
-      } else {
-        segments = new Segments({
-          duration: formData.duration.toString(),
-          amount: amountBigNumber.toString(),
-          exponent: isExponentialType ? 3 : 1,
-        });
-      }
 
       const tx = new Transaction();
       tx.setSender(account.address);
       tx.setGasBudget(50_000_000);
 
-      let coin;
+      let coins;
       if (selectedToken?.coinType === process.env.NEXT_PUBLIC_SUI_COIN) {
-        coin = tx.splitCoins(tx.gas, [amountBigNumber.toString()]);
+        coins = tx.splitCoins(tx.gas, formData.streams.map((stream) => {
+          return new BigNumber(stream.amount).shiftedBy(selectedToken?.decimals || 9).toString();
+        }));
       } else {
-        coin = mergeAndSplitCoins(tx, accountCoins?.data || [], amountBigNumber.toString());
+        coins = mergeAndSplitCoins(tx, accountCoins?.data || [], formData.streams.map((stream) => {
+          return new BigNumber(stream.amount).shiftedBy(selectedToken?.decimals || 9).toString();
+        }));
       }
-      const segmentsVector = segments.toVector(tx);
 
-      const cliff = (formData.cliff || 0) * 1000;
+      formData.streams.forEach((stream, index) => {
+        const amountBigNumber = new BigNumber(stream.amount).shiftedBy(selectedToken?.decimals || 9);
 
-      tx.moveCall({
-        target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::create_stream`,
-        typeArguments: [selectedToken?.coinType!],
-        arguments: [
-          coin,
-          tx.pure.address(formData.recipient),
-          tx.pure.u64(new Date().getTime() + 1000 * 60),
-          tx.pure.u64(cliff),
-          segmentsVector,
-          tx.object("0x6")
-        ]
+        let segments;
+        if (isStepsType && stream?.steps_count) {
+          segments = Segments.fromNewStream(stream, amountBigNumber);
+        } else {
+          segments = new Segments({
+            duration: stream.duration,
+            amount: amountBigNumber.toString(),
+            exponent: isExponentialType ? 3 : 1,
+          });
+        }
+
+        const segmentsVector = segments.toVector(tx);
+        const cliff = (stream.cliff || 0) * 1000;
+
+        tx.moveCall({
+          target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::create_stream`,
+          typeArguments: [selectedToken?.coinType!],
+          arguments: [
+            coins[index],
+            tx.pure.address(stream.recipient),
+            tx.pure.u64(new Date().getTime() + 1000 * 60),
+            tx.pure.u64(cliff),
+            segmentsVector,
+            tx.object("0x6")
+          ]
+        });
       });
 
       await sendTransaction(tx);
+
+      router.push(homePath);
     } finally {
       setLoading(false);
     }
@@ -177,28 +218,30 @@ const Home: NextPage = () => {
           <p className="mt-2 mb-8 font-light text-sm">Start streaming your tokens in minutes.</p>
 
           <div className="flex flex-col space-y-4">
-            <div className="bg-neutral-950 rounded-lg border border-neutral-900 h-12 flex items-center justify-between px-4 text-neutral-400 font-medium text-sm">
-              <div className="flex items-center">
-                <LockClosedIcon className="w-4 h-4 mr-2" /> {streamType?.title} stream
+            <div className='flex items-center w-full space-x-4'>
+              <div className="flex-1 bg-neutral-950 rounded-lg border border-neutral-900 h-12 flex items-center justify-between px-4 text-neutral-400 font-medium text-sm">
+                <div className="flex items-center">
+                  <LockClosedIcon className="w-4 h-4 mr-2" /> {streamType?.title} stream
+                </div>
+                <div>
+                  <img src={`/gallery/${streamType?.id}.svg`} alt={streamType?.title} className="h-6" />
+                </div>
               </div>
-              <div>
-                <img src={`/gallery/${streamType?.id}.svg`} alt={streamType?.title} className="h-6" />
-              </div>
+
+              <ul className='hidden sm:flex flex-1 bg-neutral-950 rounded-lg border border-neutral-900 uppercase h-12 px-4 text-xs items-center justify-between'>
+                <li onClick={() => switchCreationType('manual')} className={classNames('flex items-center cursor-pointer', creationType === 'manual' ? 'text-neutral-100' : 'text-neutral-400')}><PencilIcon className='w-4 mr-2' />  manual</li>
+                <li className='h-[0.5px] bg-neutral-800 flex-auto mx-3 hidden sm:block'></li>
+                <li onClick={() => switchCreationType('csv')} className={classNames('flex items-center cursor-pointer', creationType === 'csv' ? 'text-neutral-100' : 'text-neutral-400')}><DocumentChartBarIcon className='w-4 mr-2' /> csv</li>
+              </ul>
             </div>
 
             <FormProvider {...formMethods}>
               <form className="flex flex-col space-y-4" onSubmit={handleSubmit(createStream)}>
                 <TokenSelect onSelect={(token) => setSelectedToken(token)} aiInput={aiInput} />
 
-                <AmountInput token={selectedToken} aiInput={aiInput} />
+                <div className='h-[1px] bg-neutral-900 w-full'></div>
 
-                <RecipientInput aiInput={aiInput} />
-
-                <DurationInput label="Duration" formId="duration" aiInput={aiInput} />
-
-                {isCliffType && <DurationInput label="Cliff" formId="cliff" />}
-
-                {isStepsType && <NumberInput label="Steps Count" formId="steps_count" />}
+                {creationType === 'manual' ? <ManualCreateStream aiInput={aiInput} selectedToken={selectedToken} isCliffType={isCliffType} isStepsType={isStepsType} /> : <CsvCreateStream selectedToken={selectedToken?.name} />}
 
                 {router?.query?.ai && <p className='text-xs mt-2 text-orange-400'>Data filled with AI. Please make sure all the data is correct before signing the transaction.</p>}
 

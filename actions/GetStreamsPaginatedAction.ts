@@ -1,12 +1,11 @@
 import { NextApiRequest } from 'next';
 
 import { StreamsRepository } from '../repositories/StreamsRepository';
-import { IStreamResponse } from '../types';
 import ApiResponse from './_base/ApiResponse';
 import BaseAction from './_base/BaseAction';
 
 export default class GetStreamsPaginatedAction extends BaseAction {
-  async handle(req: NextApiRequest): Promise<ApiResponse<IStreamResponse[]>> {
+  async handle(req: NextApiRequest): Promise<ApiResponse<any[]>> {
     // @ts-ignore
     const {
       address,

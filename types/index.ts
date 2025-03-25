@@ -1,17 +1,14 @@
-export interface CreateStreamPayment {
-  token_identifier: string;
+export interface ICreateStreamItem {
   amount: number;
-  decimals?: number;
+  duration: number;
+  recipient: string;
+  cliff?: number;
+  steps_count?: number;
 }
 
 export interface ICreateStream {
-  amount: number;
-  duration: number;
   payment_token: string;
-  recipient: string;
-  can_cancel: boolean;
-  cliff?: number;
-  steps_count?: number;
+  streams: ICreateStreamItem[];
 }
 
 export enum StreamType {
@@ -81,51 +78,10 @@ export interface IClaimResource {
   createdAt: Date;
 }
 
-export interface IStreamResponse {
-  id: number;
-  status: string;
-  created_at: string;
-  tx_hash: string;
-  stream: {
-    sender: string;
-    last_claim_by?: string;
-    payment: {
-      token_identifier: string;
-      token_name: string;
-      token_nonce: number;
-      token_decimals: number;
-      amount: string;
-      amount_with_fees: string;
-    };
-    start_time: string;
-    end_time: string;
-    can_cancel: boolean;
-    cliff: number;
-    balance?: {
-      streamed_amount: string;
-      claimed_amount: string;
-      balances_after_cancel?: {
-        sender_balance: string;
-        recipient_balance: string;
-      };
-      recipient_balance?: string;
-      streamed_until_cancel?: string;
-    };
-    segments: ISegment[];
-  };
-  nft?: {
-    collection: string;
-    nonce: number;
-    identifier: string;
-    name: string;
-    url: string;
-  };
-}
-
 export interface ISegment {
   amount: string;
   exponent: number;
-  duration: string;
+  duration: number;
 }
 
 export interface IChartSegment extends ISegment {

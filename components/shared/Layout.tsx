@@ -1,11 +1,9 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { InformationCircleIcon, LockClosedIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useState } from "react";
-
-import ContractAbi from "../../utils/coindrip.abi.json";
-import { classNames, getHerotag, getShortAddress } from '../../utils/presentation';
-import { authPath, homePath } from "../../utils/routes";
+import { Fragment } from "react";
+import { classNames } from '../../utils/presentation';
+import { homePath } from "../../utils/routes";
 import Logo from "./Logo";
 import { ConnectButton } from "@mysten/dapp-kit";
 
@@ -201,8 +199,7 @@ export default function Layout({ children }: any) {
             </li>
           </ul>
           <ul className="flex items-center justify-center sm:space-x-8 text-xs mt-8 text-slate-200 flex-col sm:flex-row space-y-4 sm:space-y-0 font-light">
-            <li>CoinDrip Protocol v{ContractAbi.buildInfo.contractCrate.version}</li>
-            {/* <li>Build {process.env.BUILD_ID}</li> */}
+            <li>CoinDrip Protocol v</li>
           </ul>
         </footer>
 

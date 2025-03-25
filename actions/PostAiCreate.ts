@@ -1,7 +1,4 @@
 import { NextApiRequest } from 'next';
-
-import { StreamsRepository } from '../repositories/StreamsRepository';
-import { IStreamResponse } from '../types';
 import ApiResponse from './_base/ApiResponse';
 import BaseAction from './_base/BaseAction';
 import OpenAI from 'openai';

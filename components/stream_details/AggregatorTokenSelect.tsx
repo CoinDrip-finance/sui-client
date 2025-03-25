@@ -1,15 +1,9 @@
-import { Aggregator } from '@ashswap/ash-sdk-js/out';
-import { useAuth } from '@elrond-giants/erd-react-hooks/dist';
 import { Combobox } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { useEffect, useMemo, useState } from 'react';
-
-import { chainId, mediaUrl } from '../../config';
 import { classNames } from '../../utils/presentation';
 import { useCurrentAccount } from '@mysten/dapp-kit';
-import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
 import axios from 'axios';
-import { symbol } from 'joi';
 
 export interface AggregatorToken {
   type: string;
@@ -137,7 +131,7 @@ export default function AggregatorTokenSelect({
         </div>
       </Combobox>
       <p className="text-xs mt-2 text-neutral-600">
-        Using the AshSwap Aggregator you can withdraw from this stream in any token.
+        Using the 7k Aggregator you can withdraw from this stream in any token.
       </p>
     </div>
   );

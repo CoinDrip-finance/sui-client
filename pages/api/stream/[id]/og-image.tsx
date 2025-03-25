@@ -1,8 +1,6 @@
 import { ImageResponse } from "@vercel/og";
 import moment from "moment";
 import { NextApiHandler } from "next";
-
-import { IStreamResponse } from "../../../../types";
 import { denominate } from "../../../../utils/economics";
 import { extractTokenName, formatNumber, getShortAddress } from "../../../../utils/presentation";
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';

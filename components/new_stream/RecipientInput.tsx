@@ -13,7 +13,7 @@ const formatName = (name?: string) => {
   return name + '.sui';
 }
 
-export default function RecipientInput({ aiInput }: { aiInput?: CreateStreamAiInput }) {
+export default function RecipientInput({ fieldIndex, aiInput }: { fieldIndex: number; aiInput?: CreateStreamAiInput }) {
   const { setValue, register } = useFormContext();
   const [recipientInputValue, setRecipientInputValue] = useState<string>();
   const [recipientAddress, setRecipientAddress] = useState<string>();
@@ -76,7 +76,7 @@ export default function RecipientInput({ aiInput }: { aiInput?: CreateStreamAiIn
 
   useEffect(() => {
     if (!recipientAddress) return;
-    setValue("recipient", recipientAddress);
+    setValue(`streams.${fieldIndex}.recipient`, recipientAddress);
   }, [recipientAddress]);
 
   return (

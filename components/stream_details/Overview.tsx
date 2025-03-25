@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 
-import { IStreamFields, IStreamResource, IStreamResponse } from '../../types';
+import { IStreamResource } from '../../types';
 import { extractTokenName, formatNumber, getAmountStreamed, getClaimedAmount, getDepositAmount } from '../../utils/presentation';
 import { CoinMetadata } from '@mysten/sui/client';
-import { denominate } from '../../utils/economics';
 
 export default function Overview({ data, tokenMetadata, tokenIcon }: { data: IStreamResource; tokenMetadata: CoinMetadata; tokenIcon?: string }) {
   const amountStreamed = useMemo(() => {

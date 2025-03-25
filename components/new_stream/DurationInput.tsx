@@ -5,6 +5,7 @@ import DurationModal from './DurationModal';
 import { CreateStreamAiInput } from '../../pages/new';
 
 interface DurationInputProps {
+  fieldIndex: number;
   label: string;
   formId: string;
   aiInput?: CreateStreamAiInput;
@@ -25,7 +26,7 @@ const formatDuration = (ms: number) => {
     .join(", ");
 };
 
-export default function DurationInput({ label, formId, aiInput }: DurationInputProps) {
+export default function DurationInput({ fieldIndex, label, formId, aiInput }: DurationInputProps) {
   const { setValue, register } = useFormContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<number | null>();
@@ -41,7 +42,7 @@ export default function DurationInput({ label, formId, aiInput }: DurationInputP
   const onModalClose = (duration?: number) => {
     setIsModalOpen(false);
     if (duration) {
-      setValue(formId, duration);
+      setValue(`streams.${fieldIndex}.${formId}`, duration);
       setSelectedDuration(duration);
     } else {
       setSelectedDuration(null);
@@ -55,7 +56,7 @@ export default function DurationInput({ label, formId, aiInput }: DurationInputP
   }, [selectedDuration]);
 
   return (
-    <div>
+    <div className='flex-1'>
       <div className="block font-light text-sm mb-2">{label}</div>
       <div className="relative w-full">
         <input

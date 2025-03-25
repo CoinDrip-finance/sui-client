@@ -1,6 +1,5 @@
 import moment from "moment";
 
-import { IStreamResponse } from "../../../../types";
 import { generateNftSvg } from "../../../../utils/nft-image";
 
 import type { NextApiRequest, NextApiResponse } from "next";

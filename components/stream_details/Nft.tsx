@@ -1,7 +1,7 @@
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 import { network, xoxnoUrl } from "../../config";
-import { IStreamResource, IStreamResponse } from "../../types";
+import { IStreamResource } from "../../types";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { getShortAddress } from "../../utils/presentation";
 

@@ -1,14 +1,9 @@
-import { useAuth } from '@elrond-giants/erd-react-hooks/dist';
 import { ArrowDownTrayIcon, BanknotesIcon, ChartPieIcon, ClockIcon, KeyIcon, WalletIcon } from '@heroicons/react/24/outline';
 import moment from 'moment';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Moment from 'react-moment';
-import { swapPTB } from 'navi-aggregator-sdk';
-import { network } from '../../config';
 import { useTransaction } from '../../hooks/useTransaction';
-import { IStreamResource, IStreamResponse, StreamStatus } from '../../types';
-import StreamingContract from '../../utils/contracts/streamContract';
-import { denominate } from '../../utils/economics';
+import { IStreamResource, StreamStatus } from '../../types';
 import { extractTokenName, formatNumber, getAmountStreamed, getClaimedAmount, getDepositAmount, getShortAddress, getStreamStatus } from '../../utils/presentation';
 import AggregatorTokenSelect, { AggregatorToken } from './AggregatorTokenSelect';
 import StreamDetailsBasePopup from './PopupBase';

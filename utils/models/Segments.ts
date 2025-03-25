@@ -1,7 +1,7 @@
 import { Transaction, TransactionArgument } from "@mysten/sui/transactions";
 import BigNumber from 'bignumber.js';
 
-import { ICreateStream, ISegment } from '../../types';
+import { ICreateStream, ICreateStreamItem, ISegment } from '../../types';
 
 BigNumber.config({ EXPONENTIAL_AT: 19 });
 
@@ -34,10 +34,10 @@ export class Segments {
     return tx.makeMoveVec({ elements: segments, type: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::Segment` })
   }
 
-  static fromNewStream(streamData: ICreateStream, amount: BigNumber): Segments {
-    const segmentsCount: number = streamData.steps_count!;
-    const segmentDuration = Math.floor(streamData.duration / segmentsCount);
-    const segmentDurationError = streamData.duration - segmentDuration * segmentsCount;
+  static fromNewStream(stream: ICreateStreamItem, amount: BigNumber): Segments {
+    const segmentsCount: number = stream.steps_count!;
+    const segmentDuration = Math.floor(stream.duration / segmentsCount);
+    const segmentDurationError = stream.duration - segmentDuration * segmentsCount;
 
     const segmentAmount = amount.div(segmentsCount).integerValue(BigNumber.ROUND_DOWN);
     const segmentAmountError = amount.minus(segmentAmount.times(segmentsCount));

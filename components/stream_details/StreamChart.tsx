@@ -12,7 +12,7 @@ import BigNumber from 'bignumber.js';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
-import { IChartSegment, ISegment, IStreamResource, IStreamResponse } from '../../types';
+import { IChartSegment, ISegment, IStreamResource } from '../../types';
 import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
 import { extractTokenName } from '../../utils/presentation';
 
@@ -78,7 +78,7 @@ const generatePointsFromSegments = (cliff: number, segments: IChartSegment[]): A
 
   segments.forEach((segment) => {
     for (let i = 0; i <= 100; i++) {
-      const pointDuration = (i * parseInt(segment.duration)) / 100;
+      const pointDuration = (i * segment.duration) / 100;
       const pointAmount = Math.pow(i / 100, segment.exponent) * segment.denominatedAmount;
       const pointDate = segment.startDate.clone().add(pointDuration, "s");
       if (pointDate > cliffEnd) {
@@ -121,7 +121,7 @@ export default withTooltip<AreaProps & { stream: IStreamResource; tokenMetadata:
         stream.segments.map(s => {
           return {
             ...s,
-            duration: parseInt(s.duration) / 1000,
+            duration: s.duration / 1000,
           }
         })
       );

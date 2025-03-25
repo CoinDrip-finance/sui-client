@@ -1,19 +1,12 @@
 import {
   ArrowDownTrayIcon,
   EllipsisHorizontalIcon,
-  HandRaisedIcon,
   PaperAirplaneIcon,
-  XCircleIcon,
 } from "@heroicons/react/24/outline";
-import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { KeyedMutator } from "swr";
-
-import { network } from "../../config";
-import { IStreamResource, IStreamResponse, StreamStatus } from "../../types";
+import { IStreamResource, StreamStatus } from "../../types";
 import { getStreamStatus } from "../../utils/presentation";
-import CancelPopup from "./CancelPopup";
-import ClaimAfterCancelPopup from "./ClaimAfterCancelPopup";
 import ClaimPopup from "./ClaimPopup";
 import MoreActionsPopup, { MoreActionsItem } from "./MoreActionsPopup";
 import { CoinMetadata } from '@mysten/sui/client';

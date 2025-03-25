@@ -1,6 +1,6 @@
 import { handler } from '../../actions/_base/handler';
-import GetEsdtAction from '../../actions/GetEsdtsAction';
+import GetAllTokensAction from '../../actions/GetAllTokensAction';
 
 export default handler({
-    get: GetEsdtAction,
+    get: GetAllTokensAction,
 });

@@ -2,7 +2,7 @@ import { LockClosedIcon } from '@heroicons/react/20/solid';
 import Link from 'next/link';
 
 import { StreamType } from '../../types';
-import { authPath, newStreamPathType } from '../../utils/routes';
+import { newStreamPathType } from '../../utils/routes';
 import { ConnectModal, useCurrentAccount } from '@mysten/dapp-kit';
 import { useMemo, useState } from 'react';
 

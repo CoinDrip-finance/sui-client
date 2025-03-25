@@ -3,7 +3,7 @@ import BigNumber from "bignumber.js";
 import moment from "moment";
 
 import { network } from "../config";
-import { IStreamFields, IStreamResource, IStreamResponse, StreamStatus } from "../types";
+import { IStreamResource, StreamStatus } from "../types";
 import { denominate } from "./economics";
 import { CoinMetadata } from "@mysten/sui/dist/cjs/client";
 
@@ -39,20 +39,6 @@ export const getStreamStatusListing = (stream: IStreamResource): StreamStatus =>
   if (moment() < endTime) return StreamStatus.InProgress;
 
   if (stream.remaining_balance === "0") return StreamStatus.Finished;
-
-  return StreamStatus.Settled;
-};
-
-export const getStreamStatusDetails = (stream: IStreamResponse): StreamStatus => {
-  if (stream.status === "finalized") return StreamStatus.Finished;
-
-  if (stream.status === "cancelled") return StreamStatus.Canceled;
-
-  const startTime = moment(stream.stream.start_time);
-  if (moment() < startTime) return StreamStatus.Pending;
-
-  const endTime = moment(stream.stream.end_time);
-  if (moment() < endTime) return StreamStatus.InProgress;
 
   return StreamStatus.Settled;
 };

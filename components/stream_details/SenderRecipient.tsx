@@ -1,10 +1,6 @@
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
-import { useEffect, useMemo, useState } from 'react';
-
-import { network } from '../../config';
-import { IStreamFields, IStreamResource, IStreamResponse, StreamStatus } from '../../types';
-import { getShortAddress, getStreamStatus } from '../../utils/presentation';
+import { useMemo } from 'react';
+import { getShortAddress } from '../../utils/presentation';
 import { useSuiClientQuery } from '@mysten/dapp-kit';
 
 export default function SenderRecipientDetails({ senderAddress, recipientAddress }: { senderAddress: string; recipientAddress: string }) {

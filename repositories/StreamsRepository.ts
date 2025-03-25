@@ -38,7 +38,9 @@ export class StreamsRepository extends BaseRepository<IStreamResource> {
     const result = data.map((e: IStreamResource) => {
       return {
         ...e,
+        // @ts-ignore
         start_time: parseInt(e.start_time),
+        // @ts-ignore
         end_time: parseInt(e.end_time),
       }
     });
