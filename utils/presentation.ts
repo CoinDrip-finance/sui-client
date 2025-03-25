@@ -1,8 +1,4 @@
-import axios from "axios";
-import BigNumber from "bignumber.js";
 import moment from "moment";
-
-import { network } from "../config";
 import { IStreamResource, StreamStatus } from "../types";
 import { denominate } from "./economics";
 import { CoinMetadata } from "@mysten/sui/dist/cjs/client";
@@ -24,11 +20,6 @@ export function extractTokenName(input: string): string {
   // Split by '::' and take the last element
   const segments = input.split('::');
   return segments[segments.length - 1] || '';
-}
-
-export async function getHerotag(address: string): Promise<string | undefined> {
-  const { data } = await axios.get(`${network.apiAddress}/accounts/${address}`);
-  return data?.username;
 }
 
 export const getStreamStatusListing = (stream: IStreamResource): StreamStatus => {

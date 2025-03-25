@@ -1,8 +1,6 @@
 import { Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Fragment } from 'react';
-
-import { network } from '../config';
 import { classNames } from '../utils/presentation';
 
 export enum NotificationType {
@@ -62,7 +60,7 @@ export default function Notification(
               <p className="mt-1 text-sm text-neutral-400 break-all">
                 {body?.length === 64 ? (
                   <a
-                    href={`${network.explorerAddress}/transactions/${body}`}
+                    href={`${process.env.NEXT_PUBLIC_EXPLORER}/transactions/${body}`}
                     target="_blank"
                     rel="noreferrer"
                     className="hover:underline"

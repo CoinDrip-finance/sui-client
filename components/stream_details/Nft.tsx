@@ -1,6 +1,4 @@
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-
-import { network, xoxnoUrl } from "../../config";
 import { IStreamResource } from "../../types";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { getShortAddress } from "../../utils/presentation";
@@ -53,7 +51,7 @@ export default function Nft({ data }: { data: IStreamResource }) {
 
             <a
               className="auth-button py-2 px-6 inline-flex items-center"
-              href={`${xoxnoUrl}/nft/${data.stream_id}`}
+              href={`${process.env.NEXT_PUBLIC_EXPLORER}/object/${data.stream_id}`}
               target="_blank"
               rel="noreferrer"
             >
