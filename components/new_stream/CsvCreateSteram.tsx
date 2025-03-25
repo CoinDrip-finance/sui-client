@@ -43,7 +43,7 @@ export default function CsvCreateStream({ selectedToken }: { selectedToken?: str
                     for (let i = 0; i < durationSegments.length; i += 2) {
                         const value = Number(durationSegments[i]);
                         const unit = durationSegments[i + 1];
-                        duration += moment.duration(value, unit as any).asMilliseconds();
+                        duration += moment.duration(value, unit as any).asSeconds();
                     }
 
                     return {
