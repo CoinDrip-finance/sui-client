@@ -23,7 +23,7 @@ export function extractTokenName(input: string): string {
 }
 
 export const getStreamStatusListing = (stream: IStreamResource): StreamStatus => {
-  const startTime = moment();
+  const startTime = moment(stream.start_time);
   if (moment() < startTime) return StreamStatus.Pending;
 
   const endTime = moment(stream.end_time);

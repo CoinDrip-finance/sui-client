@@ -58,9 +58,9 @@ export default function Notification(
             <div className="ml-3 w-0 flex-1 pt-0.5">
               <p className="text-sm font-medium text-white">{title}</p>
               <p className="mt-1 text-sm text-neutral-400 break-all">
-                {body?.length === 64 ? (
+                {type === NotificationType.SUCCESS || type === NotificationType.ERROR ? (
                   <a
-                    href={`${process.env.NEXT_PUBLIC_EXPLORER}/transactions/${body}`}
+                    href={`${process.env.NEXT_PUBLIC_EXPLORER}/txblock/${body}`}
                     target="_blank"
                     rel="noreferrer"
                     className="hover:underline"

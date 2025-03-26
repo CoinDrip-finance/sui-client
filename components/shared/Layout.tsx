@@ -16,9 +16,7 @@ interface NavigationItem {
 }
 
 const navigation: NavigationItem[] = [
-  { name: "Vesting", href: "/", current: true, icon: ShieldCheckIcon },
-  { name: "Payments", href: "/", locked: true },
-  { name: "Airdrops", href: "/", locked: true },
+
 ];
 const userNavigation: any[] = [];
 

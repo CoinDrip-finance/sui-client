@@ -1,22 +1,18 @@
-import {INotificationProps, NotificationType} from "../components/Notification";
+import { INotificationProps, NotificationType } from "../components/Notification";
 import {
     removeNotification as _removeNotification,
     upsertNotification
 } from "../redux/slices/notificationsSlice";
-import {useAppDispatch} from "./useStore";
-import {nanoid} from "nanoid";
+import { useAppDispatch } from "./useStore";
+import { nanoid } from "nanoid";
 
-export type TransactionNotificationStatus = "new" | "success" | "pending" | "invalid" | "failed";
+export type TransactionNotificationStatus = "new" | "success" | "failure";
 
 const getTitle = (status: TransactionNotificationStatus): string => {
     switch (status) {
         case "new":
             return "Transaction submitted"
-        case "pending":
-            return "Transaction pending"
-        case "invalid":
-            return "Invalid transaction"
-        case "failed":
+        case "failure":
             return "Transaction failed";
         case "success":
             return "Transaction succeeded"
@@ -27,10 +23,7 @@ const getTitle = (status: TransactionNotificationStatus): string => {
 };
 const getType = (status: TransactionNotificationStatus): NotificationType => {
     switch (status) {
-        case "pending":
-            return NotificationType.WARNING;
-        case "invalid":
-        case "failed":
+        case "failure":
             return NotificationType.ERROR;
         case "success":
             return NotificationType.SUCCESS;
@@ -47,7 +40,7 @@ export function useTransactionNotifications() {
             title: getTitle(status),
             body: transactionHash,
             type: getType(status),
-            dismissible: (status === "success" || status === "invalid" || status === "failed")
+            dismissible: (status === "success" || status === "failure")
         };
 
         dispatch(upsertNotification(notification));
@@ -77,5 +70,5 @@ export function useTransactionNotifications() {
         dispatch(_removeNotification(id));
     };
 
-    return {pushTxNotification, pushSignTransactionNotification, removeNotification};
+    return { pushTxNotification, pushSignTransactionNotification, removeNotification };
 }
