@@ -8,7 +8,7 @@ import axios from 'axios';
 
 const client = instructor({
   client: new OpenAI({
-    apiKey: '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'
+    apiKey: process.env.OPEN_AI_API_KEY
   }),
   mode: 'TOOLS'
 });
