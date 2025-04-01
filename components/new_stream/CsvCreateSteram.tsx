@@ -82,12 +82,6 @@ export default function CsvCreateStream({ selectedToken }: { selectedToken?: str
 
     return (
         <div>
-            {/* <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileUpload}
-            /> */}
-
             <FileUpload onFileSelect={handleFileUpload} />
 
             {!!fields.length && <>
@@ -105,14 +99,14 @@ export default function CsvCreateStream({ selectedToken }: { selectedToken?: str
                                 <tr key={index}>
                                     <td className="text-neutral-400">{getShortAddress(field.recipient, 6)}</td>
                                     <td className="text-neutral-400">{field.amount} {selectedToken}</td>
-                                    <td className="text-neutral-400">{moment.duration(field.duration).humanize()}</td>
+                                    <td className="text-neutral-400">{moment.duration(field.duration, 's').humanize()}</td>
                                 </tr>
                             ))}
                             {errorData.map((field, index) => (
                                 <tr key={index} className='text-orange-400'>
                                     <td><ExclamationTriangleIcon className='inline-block w-4 mr-2' /> {getShortAddress(field.recipient, 6)}</td>
                                     <td>{field.amount} {selectedToken}</td>
-                                    <td>{moment.duration(field.duration).humanize()}</td>
+                                    <td>{moment.duration(field.duration, 's').humanize()}</td>
                                 </tr>
                             ))}
                         </tbody>
