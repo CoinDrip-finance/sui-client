@@ -1,4 +1,4 @@
-import { AcademicCapIcon, DocumentChartBarIcon, InformationCircleIcon, LockClosedIcon, PencilIcon, PlusCircleIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { AcademicCapIcon, DocumentChartBarIcon, LockClosedIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { joiResolver } from '@hookform/resolvers/joi';
 import BigNumber from 'bignumber.js';
 import Joi from 'joi';
@@ -8,10 +8,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import type { NextPage } from "next";
 import { StreamItemType } from '../components/gallery/StreamTypeItem';
-import AmountInput from '../components/new_stream/AmountInput';
-import DurationInput from '../components/new_stream/DurationInput';
-import NumberInput from '../components/new_stream/NumberInput';
-import RecipientInput from '../components/new_stream/RecipientInput';
 import TokenSelect, { TokenWithMetadata } from '../components/new_stream/TokenSelect';
 import RequiresAuth from '../components/RequiresAuth';
 import BackButtonWrapper from '../components/shared/BackWrapper';
@@ -22,7 +18,7 @@ import { galleryPath, homePath } from '../utils/routes';
 import { streamTypes } from './gallery';
 import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit';
 import { Transaction } from "@mysten/sui/transactions";
-import { CoinStruct, PaginatedCoins } from '@mysten/sui/dist/cjs/client';
+import { CoinStruct } from '@mysten/sui/dist/cjs/client';
 import { useTransaction } from '../hooks/useTransaction';
 import { classNames } from '../utils/presentation';
 import ManualCreateStream from '../components/new_stream/ManualCreateStream';
@@ -64,6 +60,8 @@ const schema = Joi.object<ICreateStream>({
     .required(),
   streams: Joi.array().items(streamItemSchema).min(1).required(),
 });
+
+const allowedCsvTypes: StreamType[] = [StreamType.Linear];
 
 const Home: NextPage = () => {
   const account = useCurrentAccount();
@@ -228,11 +226,11 @@ const Home: NextPage = () => {
                 </div>
               </div>
 
-              <ul className='hidden sm:flex flex-1 bg-neutral-950 rounded-lg border border-neutral-900 uppercase h-12 px-4 text-xs items-center justify-between'>
+              {allowedCsvTypes.includes(streamType?.id as StreamType) && <ul className='hidden sm:flex flex-1 bg-neutral-950 rounded-lg border border-neutral-900 uppercase h-12 px-4 text-xs items-center justify-between'>
                 <li onClick={() => switchCreationType('manual')} className={classNames('flex items-center cursor-pointer', creationType === 'manual' ? 'text-neutral-100' : 'text-neutral-400')}><PencilIcon className='w-4 mr-2' />  manual</li>
                 <li className='h-[0.5px] bg-neutral-800 flex-auto mx-3 hidden sm:block'></li>
                 <li onClick={() => switchCreationType('csv')} className={classNames('flex items-center cursor-pointer', creationType === 'csv' ? 'text-neutral-100' : 'text-neutral-400')}><DocumentChartBarIcon className='w-4 mr-2' /> csv</li>
-              </ul>
+              </ul>}
             </div>
 
             <FormProvider {...formMethods}>
