@@ -14,7 +14,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { IChartSegment, ISegment, IStreamResource } from '../../types';
 import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
-import { extractTokenName } from '../../utils/presentation';
+import { extractTokenName, getAmountStreamed, getClaimedAmount } from '../../utils/presentation';
 
 interface AppleStock {
   date: string;
@@ -180,6 +180,7 @@ export default withTooltip<AreaProps & { stream: IStreamResource; tokenMetadata:
           <rect x={0} y={0} width={width} height={height} fill="url(#area-background-gradient)" rx={14} />
           <LinearGradient id="area-background-gradient" from={background} to={background2} />
           <LinearGradient id="area-gradient" from={accentColor} to={accentColor} toOpacity={0.1} />
+          <LinearGradient id="area-gradient-low-opacity" from={accentColor} to={accentColor} fromOpacity={0.1} toOpacity={0.1} />
           <GridRows
             left={margin.left}
             scale={stockValueScale}
@@ -198,16 +199,37 @@ export default withTooltip<AreaProps & { stream: IStreamResource; tokenMetadata:
             strokeOpacity={0.2}
             pointerEvents="none"
           />
-          <AreaClosed<AppleStock>
-            data={stock}
-            x={(d) => dateScale(getDate(d)) ?? 0}
-            y={(d) => stockValueScale(getStockValue(d)) ?? 0}
-            yScale={stockValueScale}
-            strokeWidth={1}
-            stroke="url(#area-gradient)"
-            fill="url(#area-gradient)"
-            curve={curveMonotoneX}
-          />
+          {(() => {
+            const splitIndex = Math.floor(stock.length * parseInt(getClaimedAmount(stream, tokenMetadata).percent) / 100); // 20% of the points
+            const first20Percent = stock.slice(0, splitIndex + 1); // Include the split point
+            const remaining80Percent = stock.slice(splitIndex); // Start from the split point
+
+            return (
+              <>
+                <AreaClosed<AppleStock>
+                  data={first20Percent}
+                  x={(d) => dateScale(getDate(d)) ?? 0}
+                  y={(d) => stockValueScale(getStockValue(d)) ?? 0}
+                  yScale={stockValueScale}
+                  strokeWidth={1}
+                  stroke="url(#area-gradient-low-opacity)"
+                  fill="url(#area-gradient-low-opacity)"
+                  curve={curveMonotoneX}
+                />
+                <AreaClosed<AppleStock>
+                  data={remaining80Percent}
+                  x={(d) => dateScale(getDate(d)) ?? 0}
+                  y={(d) => stockValueScale(getStockValue(d)) ?? 0}
+                  yScale={stockValueScale}
+                  strokeWidth={1}
+                  stroke="url(#area-gradient)"
+                  fill="url(#area-gradient)"
+                  curve={curveMonotoneX}
+                />
+              </>
+            );
+          })()}
+
           <Bar
             x={margin.left}
             y={margin.top}
@@ -220,6 +242,17 @@ export default withTooltip<AreaProps & { stream: IStreamResource; tokenMetadata:
             onMouseMove={handleTooltip}
             onMouseLeave={() => hideTooltip()}
           />
+
+          <Line
+            from={{ x: dateScale(new Date()), y: margin.top }}
+            to={{ x: dateScale(new Date()), y: innerHeight + margin.top }}
+            stroke="red"
+            strokeWidth={1}
+            strokeOpacity={1}
+            pointerEvents="none"
+            strokeDasharray="5,2"
+          />
+
           {tooltipData && (
             <g>
               <Line

@@ -43,6 +43,7 @@ export default function ClaimPopup({ data, open, onClose, streamRecipient, token
         target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::claim_from_stream`,
         typeArguments: [data.token],
         arguments: [
+          tx.object(process.env.NEXT_PUBLIC_CONTROLLER_ID!),
           tx.object(data.stream_id),
           tx.object("0x6")
         ]
@@ -55,6 +56,7 @@ export default function ClaimPopup({ data, open, onClose, streamRecipient, token
           target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::destroy_zero`,
           typeArguments: [data.token],
           arguments: [
+            tx.object(process.env.NEXT_PUBLIC_CONTROLLER_ID!),
             tx.object(data.stream_id),
           ]
         });

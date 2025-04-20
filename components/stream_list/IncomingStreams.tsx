@@ -1,14 +1,19 @@
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 import { useEffect, useMemo, useState } from "react";
-import { classNames } from "../../utils/presentation";
+import { classNames, getStreamStatus } from "../../utils/presentation";
 import StreamsTable from "./StreamsTable";
 import { SuiObjectResponse } from "@mysten/sui/dist/cjs/client";
+import { StreamStatus } from "../../types";
+import { Transaction } from '@mysten/sui/transactions';
+import { forwardRef, useImperativeHandle } from 'react';
+import { useTransaction } from "../../hooks/useTransaction";
 
-export default function IncomingStreams() {
+const IncomingStreams = forwardRef((props, ref) => {
     const account = useCurrentAccount();
     const address = account?.address;
     const [cursor, setCursor] = useState<string | null | undefined>(null);
     const [streamList, setStreamList] = useState<SuiObjectResponse[]>([]);
+    const { sendTransaction } = useTransaction();
 
     const { data, isLoading, refetch } = useSuiClientQuery(
         'getOwnedObjects',
@@ -49,7 +54,7 @@ export default function IncomingStreams() {
     const streams = useMemo<any[]>(() => {
         return streamList?.map(e => {
             return {
-                stream_id: e.data?.objectId,
+                stream_id: e.data?.objectId as string,
                 // @ts-ignore
                 sender: e.data?.content?.fields?.sender,
                 // @ts-ignore
@@ -68,12 +73,59 @@ export default function IncomingStreams() {
                 // @ts-ignore
                 remaining_balance: e.data?.content?.fields?.balance,
             }
+        }).map(e => {
+            return {
+                ...e,
+                // @ts-ignore
+                status: getStreamStatus(e),
+            }
         }) || [];
     }, [streamList]);
 
     const isLoadingMore = isLoading;
     const isEmpty = data?.data.length === 0;
     const isReachingEnd = isEmpty || !data?.hasNextPage;
+
+    const claimAll = async () => {
+        if (!address) return;
+
+        const tx = new Transaction();
+        tx.setSender(account.address);
+        tx.setGasBudget(50_000_000);
+
+        const coins: any[] = [];
+
+        streams.forEach((stream) => {
+            const [coin] = tx.moveCall({
+                target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::claim_from_stream`,
+                typeArguments: [stream.token],
+                arguments: [
+                    tx.object(stream.stream_id),
+                    tx.object("0x6")
+                ]
+            });
+
+            coins.push(coin);
+
+            if (stream.status === StreamStatus.Settled) {
+                tx.moveCall({
+                    target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::destroy_zero`,
+                    typeArguments: [stream.token],
+                    arguments: [
+                        tx.object(stream.stream_id),
+                    ]
+                });
+            }
+        });
+
+        tx.transferObjects(coins, account.address);
+
+        await sendTransaction(tx);
+    }
+
+    useImperativeHandle(ref, () => ({
+        triggerChildFunction: claimAll,
+    }));
 
     return (
         <div className="flex justify-center w-full">
@@ -103,4 +155,8 @@ export default function IncomingStreams() {
             </div>
         </div>
     );
-}
+});
+
+IncomingStreams.displayName = 'ChildComponent';
+
+export default IncomingStreams;

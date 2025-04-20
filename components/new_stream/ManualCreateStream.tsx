@@ -42,9 +42,9 @@ export default function ManualCreateStream({ aiInput, selectedToken, isCliffType
             {index + 1 < fields.length && <div className='h-[1px] bg-neutral-900 w-full'></div>}
         </>)}
 
-        <div className='flex items-center space-x-4 py-4 justify-center group cursor-pointer' onClick={() => append({ recipient: "", amount: 0, duration: 0 })}>
+        {!aiInput?.ai && <div className='flex items-center space-x-4 py-4 justify-center group cursor-pointer' onClick={() => append({ recipient: "", amount: 0, duration: 0 })}>
             <PlusIcon className='h-10 border rounded-md p-2 text-neutral-400 border-neutral-400 transition-all ease-in-out duration-300 group-hover:p-[9px]' />
             <span className='text-sm text-neutral-400  group-hover:underline'>Add new stream</span>
-        </div>
+        </div>}
     </>
 }

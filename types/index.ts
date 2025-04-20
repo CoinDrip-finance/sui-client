@@ -42,6 +42,7 @@ export interface IStreamResource {
   createdAt?: Date;
   remaining_balance: string;
   claims?: IClaimResource[];
+  status?: StreamStatus;
 }
 
 interface IStreamFieldsSegment {

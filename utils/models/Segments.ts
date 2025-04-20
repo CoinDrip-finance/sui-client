@@ -25,7 +25,7 @@ export class Segments {
   private makeSegment(tx: Transaction, amount: string, exponent: number, duration: number): TransactionArgument {
     return tx.moveCall({
       target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::new_segment`,
-      arguments: [tx.pure.u64(amount), tx.pure.u8(exponent), tx.pure.u64(duration * 1000)],
+      arguments: [tx.object(process.env.NEXT_PUBLIC_CONTROLLER_ID!), tx.pure.u64(amount), tx.pure.u8(exponent), tx.pure.u64(duration * 1000)],
     });
   }
 

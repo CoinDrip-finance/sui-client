@@ -25,6 +25,7 @@ import ManualCreateStream from '../components/new_stream/ManualCreateStream';
 import CsvCreateStream from '../components/new_stream/CsvCreateSteram';
 
 export interface CreateStreamAiInput {
+  ai: boolean;
   wallet_address: string;
   duration: string;
   amount: string;
@@ -174,18 +175,20 @@ const Home: NextPage = () => {
         const segmentsVector = segments.toVector(tx);
         const cliff = (stream.cliff || 0) * 1000;
 
-        tx.moveCall({
+        const [streamObject] = tx.moveCall({
           target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::${process.env.NEXT_PUBLIC_MODULE}::create_stream`,
           typeArguments: [selectedToken?.coinType!],
           arguments: [
+            tx.object(process.env.NEXT_PUBLIC_CONTROLLER_ID!),
             coins[index],
-            tx.pure.address(stream.recipient),
             tx.pure.u64(new Date().getTime() + 1000 * 60),
             tx.pure.u64(cliff),
             segmentsVector,
             tx.object("0x6")
           ]
         });
+
+        tx.transferObjects([streamObject], stream.recipient);
       });
 
       await sendTransaction(tx);
