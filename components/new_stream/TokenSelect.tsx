@@ -10,7 +10,6 @@ import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit';
 import { CoinBalance, CoinMetadata } from '@mysten/sui/dist/cjs/client';
 import { TokenSelectItem } from './TokenSelectItem';
 import { CreateStreamAiInput } from '../../pages/new';
-import ai from '../../pages/api/stream/ai';
 
 export type TokenWithMetadata = CoinBalance & CoinMetadata;
 

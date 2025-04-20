@@ -13,7 +13,7 @@ export const useTransaction = () => {
     return new Promise<SuiSignAndExecuteTransactionOutput>((resolve, reject) => {
       mutate(
         {
-          transaction,
+          transaction: transaction as any,
           chain: `sui:${process.env.NEXT_PUBLIC_NETWORK}`
         },
         {

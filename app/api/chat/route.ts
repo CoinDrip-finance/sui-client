@@ -48,6 +48,7 @@ const getIncomingStreams = tool({
                 showContent: true,
             },
         })
+
         return result.data || [];
     },
 });
@@ -154,6 +155,7 @@ export async function POST(req: Request) {
             - Streaming tokens to multiple recipients over time
         - Each stream is visible on-chain, and tokens are unlocked every second or depending on the streaming function that used to create the stream. Recipients can claim their available balance at any time, providing instant access to unlocked funds. Stream recipients are also issued an NFT that gives them control over the stream, enhancing composability with other DeFi protocols.
         - Users can view and manage all incoming and outgoing streams, check their statuses, and interact with the protocol via the Coindrip interface or directly on-chain.
+        - For projects, Coindrip offers a way to distribute tokens over time, ensuring that recipients receive their tokens gradually rather than in a lump sum. This can help prevent market dumps and ensure that recipients are engaged with the project over the long term in case of token vesting or airdrops.
 
         General Information:    
         - The current date in milliseconds elapsed since midnight, January 1, 1970 Universal Coordinated Time (UTC) is ${Date.now()}.
@@ -162,6 +164,7 @@ export async function POST(req: Request) {
         - Use the tools provided when needed to answer questions about incoming/outgoing streams and claims if the wallet address is provided. If no wallet, it means the user is not authenticated and you can only use the tools that don't require the wallet address. In that case, don't mention the wallet address in your answer or ask for it. Just ask the user to authenticate to get more information.
         - If a user requests information on the claimable amount from a stream, you can use the available tool to get the recipient balance. The recipient balance is the amount of tokens that can be claimed by the recipient of a stream. This amount is calculated based on the stream's start time, end time, and the current time. The recipient balance is updated in real-time as the stream progresses.
         - If a user requests information on the future claimable amount from a stream, you can compute that based on the start date, current date and the segments of the stream. The segments are the different parts of the stream that can be claimed at different times. You can use the start date and the segments information to calculate the future claimable amount. If you're not sure about the result, you can let the user know that you're not sure about the result and suggest them to check the Coindrip app for more information.
+        - A stream is composed of multiple segments, which are separate partitions with different streaming amount and rates. The protocol uses these segments to enable custom streaming curves, which power exponential streams, linear streams, etc defined by the exponent property of each segment. Segments can be used to represent any monotonic increasing function.
 
         Amounts and Token Balances Instructions:
         - All token and coin amounts are stored in the database and onchain as big integers, representing the smallest indivisible units of the token.

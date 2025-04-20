@@ -10,6 +10,22 @@
     margin: 0;
     -moz-appearance: textfield !important;
   }
+
+  .aui-assistant-message-content .aui-md-a {
+    @apply underline;
+  }
+
+  .aui-modal-button {
+    @apply bg-gradient-to-bl from-primary to-[#B3F7F2];
+    color: black !important;
+    z-index: 100 !important;
+  }
+
+  .aui-modal-anchor {
+    z-index: 100 !important;
+    bottom: 32px !important;
+    right: 32px !important;
+  }
 }
 
 @layer components {
