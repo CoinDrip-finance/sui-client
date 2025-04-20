@@ -158,7 +158,11 @@ export async function POST(req: Request) {
         - For projects, Coindrip offers a way to distribute tokens over time, ensuring that recipients receive their tokens gradually rather than in a lump sum. This can help prevent market dumps and ensure that recipients are engaged with the project over the long term in case of token vesting or airdrops.
 
         General Information:    
-        - The current date in milliseconds elapsed since midnight, January 1, 1970 Universal Coordinated Time (UTC) is ${Date.now()}.
+        - The current time is ${new Date().toISOString()} (ISO 8601 format).
+        - The current time in milliseconds since Unix epoch is ${Date.now()}.
+        - Use this timestamp as the reference for all time comparisons, such as determining whether a stream has started or ended.
+        - When interpreting or formatting time, always work in UTC.
+        - If you are unsure about how to interpret a large number like 1745025180000, treat it as milliseconds and convert it to a readable UTC date using ISO formatting.
 
         General Instructions:
         - Use the tools provided when needed to answer questions about incoming/outgoing streams and claims if the wallet address is provided. If no wallet, it means the user is not authenticated and you can only use the tools that don't require the wallet address. In that case, don't mention the wallet address in your answer or ask for it. Just ask the user to authenticate to get more information.
@@ -180,13 +184,29 @@ export async function POST(req: Request) {
         - If you're unsure about the decimals, try to find it using the token metadata tool.
         - If you're doing any math operations with token amounts, make sure to do it with the human readable result, following the above rules to avoid any inconsistencies.
 
+        Dates and Durations Instructions:
+        - All dates and timestamps are represented as milliseconds elapsed since midnight, January 1, 1970 (UTC), also known as UNIX epoch time.
+        - Always convert these raw millisecond values into **human-readable date and time strings** before displaying them to users.
+        - For example:
+            - "1702848000000" → "December 17, 2023 at 12:00 AM UTC"
+            - Use the format: "Month Day, Year at HH:MM AM/PM UTC"
+        - All durations are also expressed in milliseconds. When displaying durations:
+            - Convert them into phrases like "2 hours, 15 minutes", "3 days", or "1 hour, 45 seconds" as appropriate
+            - If referring to past or future times, use phrases like "3 days ago" or "in 10 minutes" where it improves clarity
+        - Always format dates and durations in a friendly and easy-to-understand way for end users.
+
+        To determine the status of a stream, follow these rules:
+            1. If the current time is before the stream's "start_time", the status is **Pending**.
+            2. If the current time is after the "start_time" but before the "end_time", the status is **In Progress**.
+            3. If the current time is past the "end_time" and the "remaining_balance" is exactly "0", the status is **Finished**.
+            4. If the current time is past the "end_time" but there is still a "remaining_balance" greater than "0", the status is **Settled**.
+        Always use these conditions when classifying or explaining a stream's lifecycle status. Always use this current time (${new Date().toISOString()}) reference when comparing to any stream start or end times.
+
         Other important notes for displaying information to the user:
             - If you have token types like 0000000000000000000000000000000000000000000000000000000000000002::sui::SUI use a tool to get the name of the token or only show the last part (eg SUI) if you don't have the name available using the tools.
-            - If you have any dates or timestamps in seconds or milliseconds make sure to format them in a good readable way and never display the raw data to the user. 
             - If you have stream IDs, you can display them as links to the explorer with the stream ID as a parameter. For example, if the stream ID is "0x1234567890abcdef", you can display it as [0x1234567890abcdef](${process.env.NEXT_PUBLIC_EXPLORER}/object/0x1234567890abcdef).
             - Try to be concise and give the user the information he's looking for without being too verbose and in an aggregated format.
             - Provide examples when necessary to clarify your answer.
-            - Try to only display human readable information and not raw data. If you have to display raw data, make sure to format it in a good readable way.
             - If you have a values both in a specific format and as raw data, it's not necessary to display the raw data. Just display the human readable value in the best format possible.`,
         messages,
         tools: {
@@ -197,7 +217,7 @@ export async function POST(req: Request) {
             getTokenMetadata,
             getRecipientBalance
         },
-        maxSteps: 10,
+        maxSteps: 6,
     });
 
     return result.toDataStreamResponse();
