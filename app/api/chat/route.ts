@@ -33,7 +33,7 @@ function decodeU64ReturnValue(returnValue: [number[], string]): number {
 }
 
 // Tool: getIncomingStreams
-export const getIncomingStreams = tool({
+const getIncomingStreams = tool({
     description: 'Get streams that are going to a specific wallet address',
     parameters: z.object({
         address: z.string().describe('Wallet address receiving the stream'),
@@ -53,7 +53,7 @@ export const getIncomingStreams = tool({
 });
 
 // Tool: getOutgoingStreams
-export const getOutgoingStreams = tool({
+const getOutgoingStreams = tool({
     description: 'Get streams that were created by a specific wallet',
     parameters: z.object({
         address: z.string().describe('Wallet address that created the stream'),
@@ -65,7 +65,7 @@ export const getOutgoingStreams = tool({
 });
 
 // Tool: getClaims
-export const getClaims = tool({
+const getClaims = tool({
     description: 'Get stream claims made by a wallet address',
     parameters: z.object({
         address: z.string().describe('Wallet address that claimed tokens'),
@@ -76,7 +76,7 @@ export const getClaims = tool({
     },
 });
 
-export const getAllStreams = tool({
+const getAllStreams = tool({
     description: 'Get all streams created by any user',
     parameters: z.object({}),
     execute: async () => {
@@ -85,7 +85,7 @@ export const getAllStreams = tool({
     },
 });
 
-export const getTokenMetadata = tool({
+const getTokenMetadata = tool({
     description: 'Get the metadata of a specific token like name or decimals',
     parameters: z.object({
         coinType: z.string().regex(suiTokenPattern).describe('The token type to get metadata for'),
@@ -96,7 +96,7 @@ export const getTokenMetadata = tool({
     },
 });
 
-export const getRecipientBalance = tool({
+const getRecipientBalance = tool({
     description: 'Get the recipient balance (claimable amount) of a stream',
     parameters: z.object({
         streamId: z.string().regex(streamIdPattern).describe('The stream ID to get the recipient balance for'),

@@ -1,5 +1,7 @@
 import "../styles/globals.scss";
 import '@mysten/dapp-kit/dist/index.css';
+import "@assistant-ui/react-ui/styles/index.css";
+import "@assistant-ui/react-ui/styles/modal.css";
 
 import { DefaultSeo } from "next-seo";
 import { Poppins } from "next/font/google";
@@ -19,6 +21,13 @@ const poppinsFont = Poppins({
 });
 
 import type { AppProps } from "next/app";
+import dynamic from "next/dynamic";
+
+const ChatProvider = dynamic(
+  () => import('../components/ChatProvider'),
+  { ssr: false }
+);
+
 function MyApp({ Component, pageProps }: AppProps) {
   const { networkConfig, network } = getNetworkConfig();
   const queryClient = new QueryClient();
@@ -60,10 +69,12 @@ function MyApp({ Component, pageProps }: AppProps) {
               autoConnect={true}
             >
 
-              <div className={poppinsFont.className}>
-                <Component {...pageProps} />
-                <Notifications />
-              </div>
+              <ChatProvider>
+                <div className={poppinsFont.className}>
+                  <Component {...pageProps} />
+                  <Notifications />
+                </div>
+              </ChatProvider>
 
             </WalletProvider>
           </SuiClientProvider>

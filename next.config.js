@@ -15,8 +15,20 @@ const nextConfig = {
       stream: require.resolve("stream-browserify"),
     };
 
+    config.module.rules.push({
+      test: /secure-json-parse[\\/]index\.js$/,
+      type: 'javascript/auto',
+    });
+
     return config;
   },
+  transpilePackages: [
+    '@assistant-ui/react-ui',
+    '@assistant-ui/react',
+    '@assistant-ui/react-ai-sdk',
+    '@assistant-ui/react-markdown',
+    'secure-json-parse', // 👈 critical to transpile this
+  ],
 };
 
 module.exports = nextConfig;
