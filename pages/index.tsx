@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { PlusSmallIcon } from "@heroicons/react/24/outline";
+import { ArrowDownIcon, ArrowLongDownIcon, PlusSmallIcon, Square3Stack3DIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import { NextSeo } from "next-seo";
 import { useRef, useState } from "react";
@@ -52,10 +52,9 @@ const Home: NextPage = () => {
 
         <div className="flex items-center space-x-4">
           <ActionButton
-            Icon={PlusSmallIcon}
             label="Claim all"
             onClick={claimAll}
-            className="primary-action-button flex items-center"
+            className="secondary-action-button flex items-center"
           />
           <ActionButton
             Icon={PlusSmallIcon}

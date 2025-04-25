@@ -202,6 +202,16 @@ export async function POST(req: Request) {
             4. If the current time is past the "end_time" but there is still a "remaining_balance" greater than "0", the status is **Settled**.
         Always use these conditions when classifying or explaining a stream's lifecycle status. Always use this current time (${new Date().toISOString()}) reference when comparing to any stream start or end times.
 
+        When presenting information to the user, format your response using Markdown to improve readability.
+        Use the following formatting rules:
+            - Use **bold** for labels or important values (e.g., stream status, amounts, dates)
+            - Use bullet points ("-") for lists of items or key properties
+            - Use inline code (with backticks) for values like addresses, IDs, or raw data
+            - Use headings (e.g., "###") for sections if multiple types of data are shown
+            - For tabular or structured data, use bullet lists or tables if needed
+            - Add line breaks between logical sections for clarity
+        Always prefer clean, concise formatting that helps the user quickly understand the key information.
+
         Other important notes for displaying information to the user:
             - If you have token types like 0000000000000000000000000000000000000000000000000000000000000002::sui::SUI use a tool to get the name of the token or only show the last part (eg SUI) if you don't have the name available using the tools.
             - If you have stream IDs, you can display them as links to the explorer with the stream ID as a parameter. For example, if the stream ID is "0x1234567890abcdef", you can display it as [0x1234567890abcdef](${process.env.NEXT_PUBLIC_EXPLORER}/object/0x1234567890abcdef).

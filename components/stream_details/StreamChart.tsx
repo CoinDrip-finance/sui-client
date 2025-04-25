@@ -25,7 +25,7 @@ type TooltipData = AppleStock;
 
 export const background = "#171717";
 export const background2 = "#171717";
-export const accentColor = "#00FFFA";
+export const accentColor = "#0296FF";
 export const accentColorDark = "white";
 const tooltipStyles = {
   ...defaultStyles,

@@ -204,7 +204,7 @@ export default function Layout({ children }: any) {
         <img
           src="/bg-gradient.png"
           alt=""
-          className="hidden sm:block fixed bottom-0 left-0 right-0 mx-auto pointer-events-none"
+          className="hidden sm:block fixed bottom-0 left-0 right-0 mx-auto pointer-events-none h-1/2"
         />
         <img
           src="/bg-gradient.png"

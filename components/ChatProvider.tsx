@@ -1,4 +1,3 @@
-'use client';
 // @ts-ignore
 import { useChatRuntime } from '@assistant-ui/react-ai-sdk';
 // @ts-ignore

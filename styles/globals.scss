@@ -3,6 +3,15 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    @apply bg-black;
+    @apply text-white;
+  }
+
+  input:focus {
+    @apply ring-0 #{!important};
+  }
+
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"] {
@@ -16,8 +25,7 @@
   }
 
   .aui-modal-button {
-    @apply bg-gradient-to-bl from-primary to-[#B3F7F2];
-    color: black !important;
+    @apply bg-gradient-to-bl from-primary to-secondary;
     z-index: 100 !important;
   }
 
@@ -26,18 +34,13 @@
     bottom: 32px !important;
     right: 32px !important;
   }
+
+  .aui-button-primary {
+    @apply bg-gradient-to-bl from-primary to-secondary;
+  }
 }
 
 @layer components {
-  body {
-    @apply bg-black;
-    @apply text-white;
-  }
-
-  input:focus {
-    @apply ring-0 #{!important};
-  }
-
   .auth-button {
     @apply bg-white;
     @apply py-2;
@@ -55,15 +58,23 @@
     }
   }
 
-  .nav-connect-button > button {
-    padding-top: 0.75rem !important;
-    padding-bottom: 0.75rem !important;
-  }
-
   .primary-action-button {
     @apply py-3 px-5;
-    @apply text-black;
-    @apply bg-gradient-to-bl from-primary to-[#B3F7F2];
+    @apply text-white;
+    @apply shadow-primary-btn;
+    @apply bg-gradient-to-t from-primary to-secondary;
+    @apply rounded-lg;
+    @apply font-medium text-sm;
+    &:hover {
+      @apply opacity-90;
+    }
+  }
+
+  .secondary-action-button {
+    @apply py-3 px-5;
+    @apply text-white;
+    @apply text-primary;
+    @apply border border-primary;
     @apply rounded-lg;
     @apply font-medium text-sm;
     &:hover {
@@ -88,6 +99,11 @@
     @screen sm {
       @apply py-2 px-12;
     }
+  }
+
+  .nav-connect-button > button {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
   }
 
   .streams-table {
