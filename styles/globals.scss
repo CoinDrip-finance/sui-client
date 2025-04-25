@@ -27,6 +27,7 @@
   .aui-modal-button {
     @apply bg-gradient-to-bl from-primary to-[#B5E0FF];
     z-index: 100 !important;
+    @apply scale-125;
   }
 
   .aui-modal-anchor {

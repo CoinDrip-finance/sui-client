@@ -6,6 +6,7 @@ import { classNames } from '../../utils/presentation';
 import { homePath } from "../../utils/routes";
 import Logo from "./Logo";
 import { ConnectButton } from "@mysten/dapp-kit";
+import { buildId } from "../../config";
 
 interface NavigationItem {
   name: string;
@@ -196,8 +197,8 @@ export default function Layout({ children }: any) {
               </a>
             </li>
           </ul>
-          <ul className="flex items-center justify-center sm:space-x-8 text-xs mt-8 text-slate-200 flex-col sm:flex-row space-y-4 sm:space-y-0 font-light">
-            <li>CoinDrip Protocol v</li>
+          <ul className="flex items-center justify-center sm:space-x-8 text-xs mt-8 text-slate-400 flex-col sm:flex-row space-y-4 sm:space-y-0 font-light">
+            <li>CoinDrip Protocol deployment {buildId}</li>
           </ul>
         </footer>
 
