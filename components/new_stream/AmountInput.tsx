@@ -27,9 +27,9 @@ export default function AmountInput({ fieldIndex, token, aiInput }: { fieldIndex
   }, [token?.coinType, aiInput]);
 
   const maxBalanceLabel = useMemo(() => {
-    const number = denominate(maxBalance.toString(), 2, token?.decimals).toNumber();
+    const number = denominate(maxBalance.toString(), 2, token?.decimals || 9).toNumber();
     return formatNumber(number);
-  }, [maxBalance]);
+  }, [maxBalance, token]);
 
   const selectMax = (e: any) => {
     e.preventDefault();
