@@ -14,7 +14,7 @@ module.exports = {
         "screen-xs": "580px",
       },
       boxShadow: {
-        'primary-btn': '0 8px 12px 0 rgba(2, 150, 255, 0.25)', 
+        'primary-btn': '0 8px 12px 0 rgba(2, 150, 255, 0.25)',
       },
     },
   },

@@ -25,7 +25,7 @@
   }
 
   .aui-modal-button {
-    @apply bg-gradient-to-bl from-primary to-secondary;
+    @apply bg-gradient-to-bl from-primary to-[#B5E0FF];
     z-index: 100 !important;
   }
 
@@ -36,7 +36,7 @@
   }
 
   .aui-button-primary {
-    @apply bg-gradient-to-bl from-primary to-secondary;
+    @apply bg-gradient-to-bl from-primary to-[#B5E0FF];
   }
 }
 
@@ -62,8 +62,9 @@
     @apply py-3 px-5;
     @apply text-white;
     @apply shadow-primary-btn;
-    @apply bg-gradient-to-t from-primary to-secondary;
+    @apply bg-gradient-to-bl from-primary to-[#B5E0FF];
     @apply rounded-lg;
+    @apply shadow-primary-btn;
     @apply font-medium text-sm;
     &:hover {
       @apply opacity-90;
@@ -73,8 +74,7 @@
   .secondary-action-button {
     @apply py-3 px-5;
     @apply text-white;
-    @apply text-primary;
-    @apply border border-primary;
+    @apply border border-white;
     @apply rounded-lg;
     @apply font-medium text-sm;
     &:hover {
@@ -88,12 +88,13 @@
     @apply border rounded-lg;
     @apply py-2 px-4;
     @apply cursor-pointer;
+    @apply border-primary/30;
     &:hover {
       @apply bg-neutral-600 bg-opacity-5;
     }
     &:disabled {
       @apply cursor-not-allowed;
-      @apply text-neutral-400 border-neutral-400;
+      @apply text-neutral-400 border-primary/10;
     }
 
     @screen sm {
@@ -104,6 +105,21 @@
   .nav-connect-button > button {
     padding-top: 0.75rem !important;
     padding-bottom: 0.75rem !important;
+    @apply bg-gradient-to-bl from-primary to-[#B5E0FF];
+    border-radius: 8px !important;
+    color: white !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+
+    div {
+      color: white !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+    }
+
+    svg path {
+      stroke: white !important;
+    }
   }
 
   .streams-table {

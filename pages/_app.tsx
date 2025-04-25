@@ -44,10 +44,10 @@ function MyApp({ Component, pageProps }: AppProps) {
         openGraph={{
           images: [
             {
-              url: "https://devnet.coindrip.finance/og-image.png",
-              width: 1200,
-              height: 675,
-              type: "image/png",
+              url: "https://devnet.coindrip.finance/og-image.jpg",
+              width: 2400,
+              height: 1350,
+              type: "image/jpeg",
             },
           ],
           siteName: "Coindrip",

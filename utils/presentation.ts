@@ -75,6 +75,14 @@ export const getClaimedAmount = (data: IStreamResource, tokenMetadata: CoinMetad
 export const getAmountStreamed = (data: IStreamResource, tokenMetadata: CoinMetadata): { value: number; percent: string } => {
   const currentTime = new Date().getTime();
   const startTime = data.start_time;
+
+  if (currentTime < startTime) {
+    return {
+      value: 0,
+      percent: "0",
+    };
+  }
+
   const endTime = data.end_time;
   const percent = Math.min(((currentTime - startTime) / (endTime - startTime)), 1);
   const value = parseInt(data.amount) * percent;
@@ -83,4 +91,26 @@ export const getAmountStreamed = (data: IStreamResource, tokenMetadata: CoinMeta
     value: denominate(Math.min(value, parseInt(data.amount)), 5, tokenMetadata?.decimals || 9).toNumber(),
     percent: (percent * 100).toFixed(0),
   };
+};
+
+export const copyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      // Fallback for older browsers
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed'; // avoid scrolling to bottom
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    return true;
+  } catch (err) {
+    console.error('Failed to copy: ', err);
+    return false;
+  }
 };

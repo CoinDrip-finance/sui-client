@@ -1,10 +1,10 @@
-import { BoltIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, WalletIcon } from '@heroicons/react/24/outline';
+import { BoltIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, FingerPrintIcon, WalletIcon } from '@heroicons/react/24/outline';
 import moment from 'moment';
 import { useMemo } from 'react';
 
 import { IStreamResource } from '../../types';
 import { denominate } from '../../utils/economics';
-import { extractTokenName, getStreamStatus } from '../../utils/presentation';
+import { extractTokenName, getShortAddress, getStreamStatus } from '../../utils/presentation';
 import StreamPropItem from './StreamPropItem';
 import { CoinMetadata } from '@mysten/sui/dist/cjs/client';
 
@@ -52,6 +52,7 @@ export default function StreamProps({ data, tokenMetadata }: { data: IStreamReso
       ) : (
         <StreamPropItem label="Cliff ends" date={cliff} Icon={ClockIcon} />
       )}
+      <StreamPropItem label="Stream id" copy={data.stream_id} Icon={FingerPrintIcon} />
     </div>
   );
 }

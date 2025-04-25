@@ -176,7 +176,7 @@ export default withTooltip<AreaProps & { stream: IStreamResource; tokenMetadata:
       <div className="mt-8">
         <div className="text-neutral-400 mb-1">Emission</div>
 
-        <svg width={width} height={height} className="rounded-2xl">
+        <svg width={width} height={height} className="rounded-2xl border border-neutral-800">
           <rect x={0} y={0} width={width} height={height} fill="url(#area-background-gradient)" rx={14} />
           <LinearGradient id="area-background-gradient" from={background} to={background2} />
           <LinearGradient id="area-gradient" from={accentColor} to={accentColor} toOpacity={0.1} />

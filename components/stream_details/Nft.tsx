@@ -50,7 +50,7 @@ export default function Nft({ data }: { data: IStreamResource }) {
             </p>
 
             <a
-              className="auth-button py-2 px-6 inline-flex items-center"
+              className="primary-action-button py-2 px-6 inline-flex items-center"
               href={`${process.env.NEXT_PUBLIC_EXPLORER}/object/${data.stream_id}`}
               target="_blank"
               rel="noreferrer"

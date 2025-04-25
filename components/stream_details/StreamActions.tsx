@@ -86,15 +86,19 @@ export default function StreamActions({ data, refresh, streamRecipient, tokenMet
             }
             disabled={disabledActions[StreamActionType.Claim]}
           >
-            <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+            <ArrowDownTrayIcon className="w-5 h-5 mr-2 text-primary" />
             Withdraw
           </button>
+          <button className="stream-action-button" onClick={() => { }}>
+            <PaperAirplaneIcon className="w-5 h-5 mr-2 text-primary" />
+            Transfer <span className="hidden sm:inline-block ml-1"> stream</span>
+          </button>
           <button className="stream-action-button" onClick={() => setMoreActionsPopup(true)}>
-            <EllipsisHorizontalIcon className="w-5 h-5 mr-2" />
+            <EllipsisHorizontalIcon className="w-5 h-5 mr-2 text-primary" />
             More options
           </button>
         </div>
-      </div>
+      </div >
 
       <ClaimPopup data={data} tokenMetadata={tokenMetadata} open={claimPopupOpen} onClose={onClaimPopupClose} streamRecipient={streamRecipient} />
 
