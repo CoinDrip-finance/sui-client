@@ -30,7 +30,7 @@ export const TokenSelectItem = ({ token }: { token: CoinBalance }) => {
                     <span className={classNames("ml-3 truncate", selected ? "text-white" : "")}>
                         {extractTokenName(token.coinType)}{" "}
                         <span className={classNames(active || selected ? "text-neutral-100" : "text-neutral-500")}>
-                            ({denominate(token.totalBalance, 2, coinMetadata?.decimals).toLocaleString()})
+                            ({denominate(token.totalBalance, 2, coinMetadata?.decimals || 9).toLocaleString()})
                         </span>
                     </span>
                 </div>

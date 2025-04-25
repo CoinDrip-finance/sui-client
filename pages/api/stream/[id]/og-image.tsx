@@ -17,7 +17,7 @@ const handler: NextApiHandler = async (req) => {
   try {
     const { searchParams } = new URL(req.url!);
     const id = searchParams.get("id");
-    const imageData = await fetch(new URL("./og_base.png", import.meta.url).toString()).then((res) =>
+    const imageData = await fetch(new URL("./og-base.jpg", import.meta.url).toString()).then((res) =>
       res.arrayBuffer()
     );
     if (!id) {
@@ -34,7 +34,7 @@ const handler: NextApiHandler = async (req) => {
               position: "relative",
             }}
           >
-            <img width="1200" height="650" src={`data:image/png;base64,${Buffer.from(imageData).toString("base64")}`} />
+            <img width="1200" height="650" src={`data:image/jpeg;base64,${Buffer.from(imageData).toString("base64")}`} />
           </div>
         ),
         {
@@ -125,7 +125,7 @@ const handler: NextApiHandler = async (req) => {
                       denominate(
                         streamData.initial_deposit,
                         2,
-                        tokenMetadata?.decimals
+                        tokenMetadata?.decimals || 9
                       ).toNumber()
                     )}
                   </div>
@@ -147,7 +147,7 @@ const handler: NextApiHandler = async (req) => {
                     denominate(
                       streamData.balance,
                       2,
-                      tokenMetadata?.decimals
+                      tokenMetadata?.decimals || 9
                     ).toNumber()
                   )}</div>
                   <div style={{ display: "flex", fontSize: "16px", fontWeight: "bold" }}>Balance</div>

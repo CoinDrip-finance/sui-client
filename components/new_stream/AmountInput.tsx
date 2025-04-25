@@ -33,7 +33,7 @@ export default function AmountInput({ fieldIndex, token, aiInput }: { fieldIndex
 
   const selectMax = (e: any) => {
     e.preventDefault();
-    const number = denominate(maxBalance.toString(), token?.decimals, token?.decimals).toNumber();
+    const number = denominate(maxBalance.toString(), token?.decimals, token?.decimals || 9).toNumber();
     setValue(`streams.${fieldIndex}.amount`, number);
   };
 

@@ -52,7 +52,7 @@ export default function StreamTableItem({ stream }: { stream: IStreamResource })
   }, [stream]);
 
   const amount = useMemo(() => {
-    return denominate(stream.amount, 4, coinMetadata?.decimals).toString();
+    return denominate(stream.amount, 4, coinMetadata?.decimals || 9).toString();
   }, [stream, coinMetadata]);
 
   const streamedAmount = useMemo(() => {
