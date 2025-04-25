@@ -73,7 +73,7 @@ const handler: NextApiHandler = async (req) => {
             position: "relative",
           }}
         >
-          <img width="1200" height="650" src={`data:image/png;base64,${Buffer.from(imageData).toString("base64")}`} />
+          <img width="1200" height="650" src={`data:image/jpeg;base64,${Buffer.from(imageData).toString("base64")}`} />
 
           <div
             style={{
@@ -98,7 +98,7 @@ const handler: NextApiHandler = async (req) => {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: "rgba(0,0,0,0.7)",
+                    backgroundColor: "rgba(255,255,255,0.03)",
                     borderRadius: "8px",
                     padding: "16px",
                   }}
@@ -115,7 +115,7 @@ const handler: NextApiHandler = async (req) => {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: "rgba(0,0,0,0.7)",
+                    backgroundColor: "rgba(255,255,255,0.03)",
                     borderRadius: "8px",
                     padding: "16px",
                   }}
@@ -138,7 +138,7 @@ const handler: NextApiHandler = async (req) => {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: "rgba(0,0,0,0.7)",
+                    backgroundColor: "rgba(255,255,255,0.03)",
                     borderRadius: "8px",
                     padding: "16px",
                   }}
@@ -159,7 +159,7 @@ const handler: NextApiHandler = async (req) => {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: "rgba(0,0,0,0.7)",
+                    backgroundColor: "rgba(255,255,255,0.03)",
                     borderRadius: "8px",
                     padding: "16px",
                   }}

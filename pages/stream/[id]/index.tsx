@@ -95,7 +95,7 @@ const StreamDetails: NextPage = () => {
         openGraph={{
           images: [
             {
-              url: `https://devnet-v2.coindrip.finance/api/stream/${data.stream_id}/og-image`,
+              url: `https://devnet.coindrip.finance/api/stream/${data.stream_id}/og-image`,
               width: 1200,
               height: 650,
               type: "image/png",
