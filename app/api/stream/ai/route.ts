@@ -50,7 +50,7 @@ type TokenInfoType = z.infer<typeof TokenInfo>;
 
 async function fetchTokenList(): Promise<TokenInfoType[]> {
     try {
-        const response = await axios.get(`https://${process.env.VERCEL_URL}/api/tokens`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tokens`);
         const tokens = z.array(TokenInfo).parse(response.data);
         return tokens;
     } catch (error) {

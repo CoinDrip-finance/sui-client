@@ -12,6 +12,6 @@ export const DESTROYED_TABLE = "StreamDestroyed";
 export const STREAM_LISTING_VIEW = "latest_stream_claimed_per_created";
 
 export const getTableName = (key: string) => {
-  if (process.env.NEXT_PUBLIC_NETWORK === "devnet") return DEVNET_PREFIX + key;
+  if (process.env.NEXT_PUBLIC_NETWORK === "devnet" || 'testnet') return DEVNET_PREFIX + key;
   return key;
 };

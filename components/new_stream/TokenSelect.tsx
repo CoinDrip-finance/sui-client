@@ -1,19 +1,28 @@
 import { Combobox } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
-import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import { denominate } from '../../utils/economics';
 import { classNames, extractTokenName } from '../../utils/presentation';
 import { useCurrentAccount, useSuiClientQuery } from '@mysten/dapp-kit';
 import { CoinBalance, CoinMetadata } from '@mysten/sui/dist/cjs/client';
 import { TokenSelectItem } from './TokenSelectItem';
 import { CreateStreamAiInput } from '../../pages/new';
+import axios from 'axios';
+
+function normalizeAddress(addr: string) {
+  return addr.replace(/^0x0+/, '0x').toLowerCase();
+}
+
+function findToken(arr: any[], target: string) {
+  const normalizedTarget = normalizeAddress(target);
+  return arr.find(item => normalizeAddress(item.type) === normalizedTarget);
+}
 
 export type TokenWithMetadata = CoinBalance & CoinMetadata;
 
 export default function TokenSelect({ onSelect, aiInput }: { onSelect: (token: TokenWithMetadata) => void; aiInput?: CreateStreamAiInput }) {
+  const [_iconUrl, setIconUrl] = useState<string | undefined>();
   const account = useCurrentAccount();
   const [query, setQuery] = useState("");
   const [selectedPerson, _setSelectedPerson] = useState<CoinBalance>();
@@ -32,6 +41,21 @@ export default function TokenSelect({ onSelect, aiInput }: { onSelect: (token: T
       coinType: selectedPerson?.coinType!
     },
   );
+
+
+  useEffect(() => {
+    if (selectedCoinMetadata && selectedPerson && !selectedCoinMetadata.iconUrl) {
+      (async () => {
+        const { data } = await axios.get('/api/tokens');
+        const tokenInfo = findToken(data, selectedPerson.coinType);
+        setIconUrl(tokenInfo?.iconUrl);
+      })();
+    }
+  }, [selectedCoinMetadata, selectedPerson]);
+
+  const iconUrl = useMemo(() => {
+    return selectedCoinMetadata?.iconUrl || _iconUrl;
+  }, [_iconUrl, selectedCoinMetadata]);
 
   useEffect(() => {
     if (aiInput?.token && tokens) {
@@ -84,7 +108,7 @@ export default function TokenSelect({ onSelect, aiInput }: { onSelect: (token: T
 
         {selectedPerson && (
           <div className="absolute inset-y-0 left-4 flex items-center">
-            <img src={selectedCoinMetadata?.iconUrl!} alt={selectedPerson.coinType} className="h-6 w-6 rounded-full" />
+            <img src={iconUrl!} alt={selectedPerson.coinType} className="h-6 w-6 rounded-full" />
           </div>
         )}
 

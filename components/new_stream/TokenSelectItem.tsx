@@ -4,14 +4,41 @@ import { CoinBalance } from "@mysten/sui/dist/cjs/client";
 import { classNames, extractTokenName } from "../../utils/presentation";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { denominate } from "../../utils/economics";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+
+function normalizeAddress(addr: string) {
+    return addr.replace(/^0x0+/, '0x').toLowerCase();
+}
+
+function findToken(arr: any[], target: string) {
+    const normalizedTarget = normalizeAddress(target);
+    return arr.find(item => normalizeAddress(item.type) === normalizedTarget);
+}
 
 export const TokenSelectItem = ({ token }: { token: CoinBalance }) => {
+    const [_iconUrl, setIconUrl] = useState<string | undefined>();
+
     const { data: coinMetadata } = useSuiClientQuery(
         'getCoinMetadata',
         {
             coinType: token.coinType
         },
     );
+
+    useEffect(() => {
+        if (coinMetadata && token && !coinMetadata.iconUrl) {
+            (async () => {
+                const { data } = await axios.get('/api/tokens');
+                const tokenInfo = findToken(data, token.coinType);
+                setIconUrl(tokenInfo?.iconUrl);
+            })();
+        }
+    }, [coinMetadata, token]);
+
+    const iconUrl = useMemo(() => {
+        return coinMetadata?.iconUrl || _iconUrl;
+    }, [_iconUrl, coinMetadata]);
 
     return <Combobox.Option
         key={token.coinType}
@@ -26,7 +53,7 @@ export const TokenSelectItem = ({ token }: { token: CoinBalance }) => {
         {({ active, selected }) => (
             <>
                 <div className="flex items-center">
-                    <img src={coinMetadata?.iconUrl!} alt="" className="h-6 w-6 flex-shrink-0 rounded-full" />
+                    <img src={iconUrl} alt="" className="h-6 w-6 flex-shrink-0 rounded-full" />
                     <span className={classNames("ml-3 truncate", selected ? "text-white" : "")}>
                         {extractTokenName(token.coinType)}{" "}
                         <span className={classNames(active || selected ? "text-neutral-100" : "text-neutral-500")}>

@@ -87,7 +87,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 export default MyApp;
 
 function getNetworkConfig() {
-  let network: 'mainnet' | 'devnet' = 'devnet';
+  let network: 'mainnet' | 'devnet' | 'testnet' = 'testnet';
   if (process.env.NEXT_PUBLIC_NETWORK === 'mainnet') {
     network = 'mainnet';
   }
