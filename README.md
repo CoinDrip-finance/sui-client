@@ -2,7 +2,7 @@
 
 This is the official dApp built for the [Coindrip Protocol](https://github.com/CoinDrip-finance/sui-protocol).
 
-<img width="1253" alt="Screenshot 2023-10-19 at 9 24 34 PM" src="https://github.com/CoinDrip-finance/client-v2/assets/63841990/79dc4158-d427-40ef-818d-57d353c699f3">
+![image](https://github.com/user-attachments/assets/aee941d5-9dca-4f8c-97b3-131f2a13fbaa)
 
 It offers the following functions:
 
